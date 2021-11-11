@@ -1,0 +1,14 @@
+# http://editorconfig.org
+root = true # 应在文件顶部指定的特殊属性，true表示停止搜索当前文件
+
+[*]
+charset = utf-8 # 统一字符格式
+indent_style = space # 缩进方式为空格
+indent_size = 2 # 缩进为两个空格
+end_of_line = lf # 换行符统一用lf
+insert_final_newline = true # 保证文件结尾留一个空行
+trim_trailing_whitespace = true # 移除新一行前的空白字符
+
+[*.md]
+insert_final_newline = false
+trim_trailing_whitespace = false

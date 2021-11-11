@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES5",
+    "esModuleInterop": true, // 使得导入的方式类似于es6的模式
+    "module":"ESNext", // 编译后输出的模块类型,UMD不支持rollup打包
+    "lib": [
+      "esnext"
+    ],
+    "removeComments": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    // 不报告执行不到的代码错误。
+    "allowUnreachableCode": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false, // 用于检查是否有定义了但是没有使用变量
+    "noUnusedParameters": false, // 用于检测是否在函数中没有使用的参数
+    "noImplicitReturns": true, // 用于检查函数是否有返回值
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "noFallthroughCasesInSwitch": true, // 用于检查switch中是否有case没有使用break跳出switch
+    "moduleResolution": "node",
+    "baseUrl": ".", // 用于设置解析非相对模块名称的基本目录
+    "rootDir": ".", // 来指定编译文件的根目录，编译器会在根目录查找入口文件
+    "paths": { // 用于设置模块名到基于baseUrl的路径映射
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src/**.ts", "types/global.d.ts"],
+  "exclude": ["node_modules"]
+}
