@@ -3,7 +3,7 @@
     "strict": true,
     "target": "ES5",
     "esModuleInterop": true, // 使得导入的方式类似于es6的模式
-    "module":"ESNext", // 编译后输出的模块类型,UMD不支持rollup打包
+    "module": "ESNext", // 编译后输出的模块类型,UMD不支持rollup打包
     "lib": [
       "esnext"
     ],

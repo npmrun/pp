@@ -3,10 +3,14 @@ import chalk from "chalk";
 import uuid from "uuid";
 import path from "path";
 import os from "os";
+//https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c#readable-named-exports
+//不想用pure esm, 采用ora的5.4.1版本
+// import ora from "ora";
+// import * as inquirer from "inquirer";
 import config from "@/config";
 import download from "download-git-repo";
-import writefile, { isExist } from "./writefile";
-import { readFile, readIniFile, writeIniFile } from "./util";
+import writefile, {isExist} from "./writefile";
+import {readFile, readIniFile, writeIniFile} from "./util";
 
 /**
  * 确保配置文件存在
@@ -21,6 +25,31 @@ try {
  * 读取配置
  */
 const Opts = readIniFile(config.configPath);
+
+// export function onLogin() {
+//   const promptList = [{
+//     type: 'input',
+//     message: '请输入用户名:',
+//     name: 'username',
+//   }, {
+//     type: "password",
+//     message: '请输入密码(至少6位):',
+//     name: 'password',
+//     validate: function (val: string) {
+//       if (val.length>=6) { // 校验位数
+//         return true;
+//       }
+//       return "请输入至少6位密码";
+//     }
+//   }];
+//   inquirer.prompt(promptList).then(answers => {
+//     console.log(answers); // 返回的结果
+//     let spinner = ora('登录中...').start();
+//     setTimeout(()=>{
+//       spinner.stop()
+//     }, 2000)
+//   })
+// }
 
 /**
  * 显示保存的列表
@@ -43,12 +72,12 @@ export function onList(opt?: { all?: boolean }) {
   });
 }
 
-export function onClone(name: string, opts: { dir: string }) {
-  if (!Opts.list || !Opts.list[name]) {
+export function onClone(target: string, opts: { dir: string }) {
+  if (!Opts.list || !Opts.list[target]) {
     console.log("请先添加项目");
     return;
   }
-  let data = Opts.list[name];
+  let data = Opts.list[target];
   let tempPath = path.join(os.tmpdir(), "pp-" + uuid.v4());
   let to = opts.dir;
   let git_url = "direct:" + data.url;
@@ -58,12 +87,14 @@ export function onClone(name: string, opts: { dir: string }) {
     );
     return;
   }
-  download(git_url, tempPath, { clone: true }, function (err: Error) {
+  download(git_url, tempPath, {clone: true}, function (err: Error) {
     if (err) throw err;
-    writefile(tempPath, to, { name: "哈哈" });
+    console.log("临时文件夹为:" + tempPath)
+    writefile(tempPath, to, {name: "哈哈"});
     fs.removeSync(tempPath);
+    console.log(chalk.green("已清除临时文件夹"));
     console.log(chalk.green("克隆成功"));
-    console.log(`\ncd ${to}\n`);
+    console.log(`\ncd ${to} && npm install\n`);
   });
 }
 
@@ -92,7 +123,7 @@ export function onAdd(url: string, opt: { name: string; desc?: string }) {
     onList();
     return;
   }
-  result.list[opt.name] = { ...opt, url };
+  result.list[opt.name] = {...opt, url};
   writeIniFile(config.configPath, result);
   console.log(chalk.green("添加成功"));
 }

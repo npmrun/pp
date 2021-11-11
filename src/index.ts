@@ -9,6 +9,10 @@ program.version("0.0.1", "-v, --version").description("查看当前版本号");
 program.helpOption("-h --help", "显示帮助信息");
 program.showHelpAfterError("( pp -h 查看帮助信息)");
 
+//Todo
+// program.command("login").description("登陆").action(func.onLogin);
+// program.command("whoiam").description("我是谁").action(func.onLogin);
+
 program.command("list").option('-a --all').description("查看所有模板列表").action(func.onList);
 
 program.command("check").description("查看配置文件").action(func.onCheck);
@@ -26,6 +30,6 @@ program
   .description("删除一个模板仓库")
   .action(func.onRemove);
 
-program.command("clone <name>").requiredOption("-d --dir <dir>", "目标路径").description("克隆模板仓库").action(func.onClone);
+program.command("clone <name>").requiredOption("-d --dir <target>", "目标路径").description("克隆模板仓库").action(func.onClone);
 
 program.parse(process.argv);

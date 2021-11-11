@@ -118,12 +118,12 @@ function onList(opt) {
         }
     });
 }
-function onClone(name, opts) {
-    if (!Opts.list || !Opts.list[name]) {
+function onClone(target, opts) {
+    if (!Opts.list || !Opts.list[target]) {
         console.log("请先添加项目");
         return;
     }
-    var data = Opts.list[name];
+    var data = Opts.list[target];
     var tempPath = path__default["default"].join(os__default["default"].tmpdir(), "pp-" + uuid__default["default"].v4());
     var to = opts.dir;
     var git_url = "direct:" + data.url;
@@ -134,10 +134,12 @@ function onClone(name, opts) {
     download__default["default"](git_url, tempPath, { clone: true }, function (err) {
         if (err)
             throw err;
+        console.log("临时文件夹为:" + tempPath);
         writefile(tempPath, to, { name: "哈哈" });
         fs__default["default"].removeSync(tempPath);
+        console.log(chalk__default["default"].green("已清除临时文件夹"));
         console.log(chalk__default["default"].green("克隆成功"));
-        console.log("\ncd " + to + "\n");
+        console.log("\ncd " + to + " && npm install\n");
     });
 }
 function onRemove(name) {
@@ -191,6 +193,6 @@ program
     .command("rm <name>")
     .description("删除一个模板仓库")
     .action(onRemove);
-program.command("clone <name>").requiredOption("-d --dir <dir>", "目标路径").description("克隆模板仓库").action(onClone);
+program.command("clone <name>").requiredOption("-d --dir <target>", "目标路径").description("克隆模板仓库").action(onClone);
 program.parse(process.argv);
 //# sourceMappingURL=pp.cjs.js.map

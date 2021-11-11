@@ -12,6 +12,15 @@
       "cjs"
     ]
   },
+  "author": {
+    "name": "noderun",
+    "email": "1549469775@qq.com",
+    "url": "https://xieyaxin.top"
+  },
+  "repository": "http://git.xieyaxin.top/topuser/pp",
+  "engines": {
+    "node": ">=14.17.5"
+  },
   "bin": {
     "pp": "./dist/pp.cjs.js"
   },
@@ -21,9 +30,9 @@
     "dev": "cross-env NODE_ENV=development node scripts/dev.js"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/uuid": "^8.3.1",
     "@rollup/plugin-alias": "^3.1.1",
     "@rollup/plugin-commonjs": "^15.0.0",
     "@rollup/plugin-node-resolve": "^13.0.6",
@@ -31,6 +40,7 @@
     "@types/ejs": "^3.1.0",
     "@types/fs-extra": "^9.0.13",
     "@types/ini": "^1.3.31",
+    "@types/inquirer": "^8.1.3",
     "@types/node": "^15.12.5",
     "chalk": "^4.1.2",
     "cross-env": "^7.0.3",
@@ -42,10 +52,11 @@
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-typescript2": "^0.27.2",
     "tslib": "^2.0.1",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "ora": "5.4.1",
+    "inquirer": "^8.2.0"
   },
   "dependencies": {
-    "@types/uuid": "^8.3.1",
     "commander": "^8.3.0",
     "download-git-repo": "^3.0.2",
     "ejs": "^3.1.6",
