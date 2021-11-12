@@ -3,14 +3,16 @@ import chalk from "chalk";
 import uuid from "uuid";
 import path from "path";
 import os from "os";
+import qs from "qs";
+import https from "https";
 //https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c#readable-named-exports
 //不想用pure esm, 采用ora的5.4.1版本
 // import ora from "ora";
 // import * as inquirer from "inquirer";
 import config from "@/config";
 import download from "download-git-repo";
-import writefile, {isExist} from "./writefile";
-import {readFile, readIniFile, writeIniFile} from "./util";
+import writefile, { isExist } from "./writefile";
+import { readFile, readIniFile, writeIniFile } from "./util";
 
 /**
  * 确保配置文件存在
@@ -25,6 +27,38 @@ try {
  * 读取配置
  */
 const Opts = readIniFile(config.configPath);
+
+export function onLogin(token: string) {
+  const result = Object.assign({}, Opts);
+  if (!result.token) result.token = {};
+  result.token.gitee = token;
+  writeIniFile(config.configPath, result);
+  console.log(chalk.green("已保存gitee的私人令牌"));
+}
+export function Whoami() {
+  console.log(
+    chalk.green("gitee token: ") + chalk.greenBright(Opts.token.gitee)
+  );
+}
+
+export function sync() {
+  // const options = {
+  //   hostname: 'gitee.com',
+  //   port: 443,
+  //   path: '/api/v5/gists?'+qs.stringify({access_token:''}),
+  //   method: 'GET'
+  // }
+  // const req = https.request(options, res => {
+  //   console.log(`状态码: ${res.statusCode}`)
+  //   res.on('data', d => {
+  //     process.stdout.write(d)
+  //   })
+  // })
+  // req.on('error', error => {
+  //   console.error(error)
+  // })
+  // req.end()
+}
 
 // export function onLogin() {
 //   const promptList = [{
@@ -87,10 +121,10 @@ export function onClone(target: string, opts: { dir: string }) {
     );
     return;
   }
-  download(git_url, tempPath, {clone: true}, function (err: Error) {
+  download(git_url, tempPath, { clone: true }, function (err: Error) {
     if (err) throw err;
-    console.log("临时文件夹为:" + tempPath)
-    writefile(tempPath, to, {name: "哈哈"});
+    console.log("临时文件夹为:" + tempPath);
+    writefile(tempPath, to, { name: "哈哈" });
     fs.removeSync(tempPath);
     console.log(chalk.green("已清除临时文件夹"));
     console.log(chalk.green("克隆成功"));
@@ -123,7 +157,7 @@ export function onAdd(url: string, opt: { name: string; desc?: string }) {
     onList();
     return;
   }
-  result.list[opt.name] = {...opt, url};
+  result.list[opt.name] = { ...opt, url };
   writeIniFile(config.configPath, result);
   console.log(chalk.green("添加成功"));
 }
