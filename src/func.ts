@@ -1,63 +1,49 @@
-import fs from "fs-extra";
+import { Data,Config } from "./data"
 import chalk from "chalk";
-import uuid from "uuid";
 import path from "path";
 import os from "os";
-import qs from "qs";
-import https from "https";
-//https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c#readable-named-exports
-//不想用pure esm, 采用ora的5.4.1版本
-// import ora from "ora";
-// import * as inquirer from "inquirer";
-import config from "@/config";
+import uuid from "uuid";
 import download from "download-git-repo";
-import writefile, { isExist } from "./writefile";
-import { readFile, readIniFile, writeIniFile } from "./util";
-
-/**
- * 确保配置文件存在
- */
-try {
-  fs.ensureDirSync(config.dir);
-  fs.ensureFileSync(config.configPath);
-} catch (e) {
-  throw e;
-}
-/**
- * 读取配置
- */
-const Opts = readIniFile(config.configPath);
+import writefile, {isExist} from "@/writefile";
+import fs from "fs-extra";
+import fetch, {Request} from "node-fetch";
+import qs from "qs";
 
 export function onLogin(token: string) {
-  const result = Object.assign({}, Opts);
-  if (!result.token) result.token = {};
-  result.token.gitee = token;
-  writeIniFile(config.configPath, result);
+  Config.getInstance().setGiteeToken(token)
   console.log(chalk.green("已保存gitee的私人令牌"));
 }
-export function Whoami() {
-  console.log(
-    chalk.green("gitee token: ") + chalk.greenBright(Opts.token.gitee)
-  );
+
+export function onLogOut() {
+  Config.getInstance().reomveGitee()
+  console.log(chalk.green("已清除gitee"));
 }
 
-export function sync() {
-  // const options = {
-  //   hostname: 'gitee.com',
-  //   port: 443,
-  //   path: '/api/v5/gists?'+qs.stringify({access_token:''}),
-  //   method: 'GET'
-  // }
-  // const req = https.request(options, res => {
-  //   console.log(`状态码: ${res.statusCode}`)
-  //   res.on('data', d => {
-  //     process.stdout.write(d)
-  //   })
-  // })
-  // req.on('error', error => {
-  //   console.error(error)
-  // })
-  // req.end()
+export function Whoami() {
+  let giteeConfig = Config.getInstance().getGitee()
+  let token = giteeConfig.token
+  if(token){
+    console.log(
+      chalk.green("gitee token: ") + chalk.greenBright(token)
+    );
+  }else{
+    console.log(
+      chalk.green("您尚未保存gitee token")
+    );
+  }
+}
+
+export async function sync() {
+  let giteeConfig = Config.getInstance().getGitee()
+  let token = giteeConfig.token
+  let params = qs.stringify({
+    access_token: token
+  })
+  const requestInfo = new Request('https://gitee.com/api/v5/gists?'+params,{
+    method: "GET"
+  });
+  const res = await (await fetch(requestInfo)).json()
+  console.log(res)
 }
 
 // export function onLogin() {
@@ -90,31 +76,49 @@ export function sync() {
  * @param opt 参数: all:是否显示Git地址
  */
 export function onList(opt?: { all?: boolean }) {
-  if (!Opts.list || !Object.keys(Opts.list).length) {
+  const data = Data.getInstance().getData()
+  const keys = Object.keys(data)
+  if (!data || !keys.length) {
     console.log("暂无模板列表，请自行体添加");
     return;
   }
-  Object.keys(Opts.list).forEach((key) => {
-    let value = Opts.list[key];
+  keys.forEach((key) => {
+    const value = data[key]
     if (opt?.all) {
       console.log(
-        value.name + (value.desc ? `(${value.desc})` : "") + `: ${value.url}`
+        key + (value.desc ? `(${value.desc})` : "") + `: ${value.url}`
       );
     } else {
-      console.log(value.name + (value.desc ? `(${value.desc})` : ""));
+      console.log(key + (value.desc ? `(${value.desc})` : ""));
     }
   });
 }
 
-export function onClone(target: string, opts: { dir: string }) {
-  if (!Opts.list || !Opts.list[target]) {
+export function onCopy(templateDir: string, opts: { targetDir: string }){
+  if(!isExist(templateDir)){
+    console.log(
+      chalk.red("请提供模板目录")
+    );
+    return;
+  }
+  if (isExist(opts.targetDir)) {
+    console.log(
+      chalk.red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹")
+    );
+    return;
+  }
+  writefile(templateDir, opts.targetDir);
+}
+
+export function onClone(name: string, opts: { dir: string }) {
+  const item = Data.getInstance().findOne(name)
+  if (!item) {
     console.log("请先添加项目");
     return;
   }
-  let data = Opts.list[target];
   let tempPath = path.join(os.tmpdir(), "pp-" + uuid.v4());
   let to = opts.dir;
-  let git_url = "direct:" + data.url;
+  let git_url = "direct:" + item.url;
   if (isExist(to)) {
     console.log(
       chalk.red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹")
@@ -133,10 +137,8 @@ export function onClone(target: string, opts: { dir: string }) {
 }
 
 export function onRemove(name: string) {
-  let result = Object.assign({}, Opts);
-  if (result.list && result.list[name]) {
-    delete result.list[name];
-    writeIniFile(config.configPath, result);
+  const status = Data.getInstance().remove(name)
+  if (status) {
     console.log(chalk.green("删除成功"));
   } else {
     console.error(chalk.red("不存在该模板"));
@@ -144,24 +146,16 @@ export function onRemove(name: string) {
 }
 
 export function onAdd(url: string, opt: { name: string; desc?: string }) {
-  const result = Object.assign({}, Opts);
   const http = /^(http|https)\:\/\//g;
   const git = /(git|root)\@/g;
   if (!git.test(url) && !http.test(url)) {
     console.error(chalk.red("请添加正确的Git仓库地址"));
     return;
   }
-  if (!result.list) result.list = {};
-  if (result.list[opt.name]) {
-    console.error(chalk.red("名字重复,当前存在："));
-    onList();
-    return;
-  }
-  result.list[opt.name] = { ...opt, url };
-  writeIniFile(config.configPath, result);
+  Data.getInstance().addUrl({...opt, url: url});
   console.log(chalk.green("添加成功"));
 }
 
 export function onCheck() {
-  console.log(readFile(config.configPath));
+  console.log(JSON.stringify(Data.getInstance().getData()));
 }

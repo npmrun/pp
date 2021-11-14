@@ -1,1 +1,1 @@
-asdad <%= name %>
+asdad

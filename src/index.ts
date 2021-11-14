@@ -12,8 +12,10 @@ program.showHelpAfterError("( pp -h 查看帮助信息)");
 
 //Todo
 program.command("login <token>").description("本地保存Gitee的私人令牌").action(func.onLogin);
-program.command("whoami").description("查看私人令牌").action(func.Whoami); 
- 
+program.command("whoami").description("查看私人令牌").action(func.Whoami);
+program.command("logout").description("删除私人令牌").action(func.onLogOut);
+program.command("sync").description("同步模板列表").action(func.sync);
+
 program.command("list").option('-a --all').description("查看所有模板列表").action(func.onList);
 
 program.command("check").description("查看配置文件").action(func.onCheck);
@@ -27,10 +29,11 @@ program
   .action(func.onAdd);
 
 program
-  .command("rm <name>")
+  .command("remove <name>")
   .description("删除一个模板仓库")
   .action(func.onRemove);
 
 program.command("clone <name>").requiredOption("-d --dir <target>", "目标路径").description("克隆模板仓库").action(func.onClone);
+program.command("copy <templateDir>").requiredOption("-d --targetDir <targetDir>", "目标路径").description("简单文件夹克隆").action(func.onCopy);
 
 program.parse(process.argv);
