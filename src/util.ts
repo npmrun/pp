@@ -1,6 +1,11 @@
 import ini from "ini"
 import fs from "fs-extra"
 
+export function readFileTime(path: string){
+  var stat = fs.statSync(path);
+  return stat.mtimeMs
+}
+
 export function syncReadFile(path:string, encoding: BufferEncoding="utf-8") {
   return fs.readFileSync(path, encoding)
 }

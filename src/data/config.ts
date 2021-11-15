@@ -27,9 +27,9 @@ export  default  class Config {
     writeIniFile(configPath, configData);
   }
 
-  setGiteeToken(token: string){
-    let gitee = this.getGitee()
-    gitee.token = token;
+  setGitee(data: any){
+    let config = this.getData()
+    config.gitee = data;
     this.sync()
   }
   reomveGitee(){

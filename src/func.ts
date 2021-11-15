@@ -6,45 +6,8 @@ import uuid from "uuid";
 import download from "download-git-repo";
 import writefile, {isExist} from "@/writefile";
 import fs from "fs-extra";
-import fetch, {Request} from "node-fetch";
-import qs from "qs";
 
-export function onLogin(token: string) {
-  Config.getInstance().setGiteeToken(token)
-  console.log(chalk.green("已保存gitee的私人令牌"));
-}
-
-export function onLogOut() {
-  Config.getInstance().reomveGitee()
-  console.log(chalk.green("已清除gitee"));
-}
-
-export function Whoami() {
-  let giteeConfig = Config.getInstance().getGitee()
-  let token = giteeConfig.token
-  if(token){
-    console.log(
-      chalk.green("gitee token: ") + chalk.greenBright(token)
-    );
-  }else{
-    console.log(
-      chalk.green("您尚未保存gitee token")
-    );
-  }
-}
-
-export async function sync() {
-  let giteeConfig = Config.getInstance().getGitee()
-  let token = giteeConfig.token
-  let params = qs.stringify({
-    access_token: token
-  })
-  const requestInfo = new Request('https://gitee.com/api/v5/gists?'+params,{
-    method: "GET"
-  });
-  const res = await (await fetch(requestInfo)).json()
-  console.log(res)
-}
+export * from "./gitee"
 
 // export function onLogin() {
 //   const promptList = [{
