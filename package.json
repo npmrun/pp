@@ -1,6 +1,6 @@
 {
   "name": "@noderun/pp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "命令行管理模板项目",
   "main": "dist/pp.umd.js",
   "module": "dist/pp.esm.js",

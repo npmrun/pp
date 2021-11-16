@@ -6,6 +6,7 @@ import uuid from "uuid";
 import download from "download-git-repo";
 import writefile, {isExist} from "@/writefile";
 import fs from "fs-extra";
+import ini from "ini";
 
 export * from "./gitee"
 
@@ -38,7 +39,7 @@ export * from "./gitee"
  * 显示保存的列表
  * @param opt 参数: all:是否显示Git地址
  */
-export function onList(opt?: { all?: boolean }) {
+export function onList(opt?: { all?: boolean, tag:string }) {
   const data = Data.getInstance().getData()
   const keys = Object.keys(data)
   if (!data || !keys.length) {
@@ -47,12 +48,24 @@ export function onList(opt?: { all?: boolean }) {
   }
   keys.forEach((key) => {
     const value = data[key]
+    if(opt?.tag){
+      if(!value.tag){
+        return
+      }
+      let tagList = opt.tag.split(',')
+      let tags = value.tag.split(',')
+      let filterTags = tagList.filter(v=>tags.includes(v))
+      if (!filterTags.length) {
+        console.log("暂无此标签的模板");
+        return
+      }
+    }
     if (opt?.all) {
       console.log(
-        key + (value.desc ? `(${value.desc})` : "") + `: ${value.url}`
+        key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : "") + `: ${value.url}`
       );
     } else {
-      console.log(key + (value.desc ? `(${value.desc})` : ""));
+      console.log(key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : ""));
     }
   });
 }
@@ -73,14 +86,14 @@ export function onCopy(templateDir: string, opts: { targetDir: string }){
   writefile(templateDir, opts.targetDir);
 }
 
-export function onClone(name: string, opts: { dir: string }) {
+export function onClone(name: string, target: string) {
   const item = Data.getInstance().findOne(name)
   if (!item) {
-    console.log("请先添加项目");
+    console.log(`请先添加该项目`);
     return;
   }
   let tempPath = path.join(os.tmpdir(), "pp-" + uuid.v4());
-  let to = opts.dir;
+  let to = target;
   let git_url = "direct:" + item.url;
   if (isExist(to)) {
     console.log(
@@ -108,17 +121,17 @@ export function onRemove(name: string) {
   }
 }
 
-export function onAdd(url: string, opt: { name: string; desc?: string }) {
+export function onAdd(url: string, name: string, opt: { desc?: string,tag?:string }) {
   const http = /^(http|https)\:\/\//g;
   const git = /(git|root)\@/g;
   if (!git.test(url) && !http.test(url)) {
     console.error(chalk.red("请添加正确的Git仓库地址"));
     return;
   }
-  Data.getInstance().addUrl({...opt, url: url});
+  Data.getInstance().addUrl({...opt, url: url, name: name});
   console.log(chalk.green("添加成功"));
 }
 
 export function onCheck() {
-  console.log(JSON.stringify(Data.getInstance().getData()));
+  console.log(ini.stringify(Data.getInstance().getData()));
 }

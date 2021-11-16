@@ -44,9 +44,13 @@ catch (e) {
     throw e;
 }
 
-function readFileTime(path) {
+function readFileModifyTime(path) {
     var stat = fs__default["default"].statSync(path);
     return stat.mtimeMs;
+}
+function readFileCreateTime(path) {
+    var stat = fs__default["default"].statSync(path);
+    return stat.birthtimeMs;
 }
 function writeErrorFile(content, path) {
     if (path === void 0) { path = "pp.error.log"; }
@@ -67,6 +71,50 @@ function readIniFile(path, encoding) {
 }
 function writeIniFile(path, data) {
     fs__default["default"].writeFileSync(path, ini__default["default"].stringify(data));
+}
+function dateTimeFormat(date, fmt) {
+    if (fmt === void 0) { fmt = 'yyyy-MM-dd HH:mm:ss'; }
+    if (!date) {
+        return '';
+    }
+    if (typeof date === 'string') {
+        date = date.replace('T', ' ').replace('Z', '');
+        date = new Date(date.replace(/-/g, '/'));
+    }
+    if (typeof date === 'number') {
+        date = new Date(date);
+    }
+    var o = {
+        'M+': date.getMonth() + 1,
+        'd+': date.getDate(),
+        'h+': date.getHours() % 12 === 0 ? 12 : date.getHours() % 12,
+        'H+': date.getHours(),
+        'm+': date.getMinutes(),
+        's+': date.getSeconds(),
+        'q+': Math.floor((date.getMonth() + 3) / 3),
+        'S': date.getMilliseconds()
+    };
+    var week = {
+        '0': '\u65e5',
+        '1': '\u4e00',
+        '2': '\u4e8c',
+        '3': '\u4e09',
+        '4': '\u56db',
+        '5': '\u4e94',
+        '6': '\u516d'
+    };
+    if (/(y+)/.test(fmt)) {
+        fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
+    }
+    if (/(E+)/.test(fmt)) {
+        fmt = fmt.replace(RegExp.$1, ((RegExp.$1.length > 1) ? (RegExp.$1.length > 2 ? '\u661f\u671f' : '\u5468') : '') + week[date.getDay() + '']);
+    }
+    for (var k in o) {
+        if (new RegExp('(' + k + ')').test(fmt)) {
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)));
+        }
+    }
+    return fmt;
 }
 
 var dataPath = config.listPath;
@@ -243,6 +291,7 @@ function onLogin(token) {
                     if (res.message) {
                         console.log(res.message);
                         console.log(chalk__default["default"].red("无效私人令牌"));
+                        return [2];
                     }
                     Config.getInstance().setGitee({
                         token: token,
@@ -258,23 +307,46 @@ function onLogOut() {
     console.log(chalk__default["default"].green("已清除gitee"));
 }
 function Whoami() {
-    var giteeConfig = Config.getInstance().getGitee();
-    var token = giteeConfig.token;
-    if (token) {
-        console.log(chalk__default["default"].green("gitee token: ") + chalk__default["default"].greenBright(token));
-    }
-    else {
-        console.log(chalk__default["default"].green("您尚未保存gitee token"));
-    }
-}
-function sync(opts) {
     return tslib.__awaiter(this, void 0, void 0, function () {
-        var giteeConfig, token, params, requestInfo, spinner, gistList, ppConfig, ppId, localTime, data, data, createTime, data;
+        var giteeConfig, token, res;
         return tslib.__generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     giteeConfig = Config.getInstance().getGitee();
                     token = giteeConfig.token;
+                    if (!token) return [3, 3];
+                    console.log(chalk__default["default"].green("gitee token: ") + chalk__default["default"].greenBright(token));
+                    return [4, fetch__default["default"]("https://gitee.com/api/v5/user?access_token=" + token)];
+                case 1: return [4, (_a.sent()).json()];
+                case 2:
+                    res = _a.sent();
+                    if (res.message) {
+                        console.log(res.message);
+                        console.log(chalk__default["default"].red("私人令牌已失效"));
+                        return [2];
+                    }
+                    console.log(chalk__default["default"].green("\u6709\u6548\u79C1\u4EBA\u4EE4\u724C\uFF0C\u6B22\u8FCE\u60A8: " + res.name + "(" + res.login + ")"));
+                    return [3, 4];
+                case 3:
+                    console.log(chalk__default["default"].green("您尚未保存gitee token"));
+                    _a.label = 4;
+                case 4: return [2];
+            }
+        });
+    });
+}
+function sync(opts) {
+    return tslib.__awaiter(this, void 0, void 0, function () {
+        var giteeConfig, token, params, requestInfo, spinner, gistList, ppConfig, ppId, localTime, localCreateTime, isJustCreate, data, data, createTime, data;
+        return tslib.__generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    giteeConfig = Config.getInstance().getGitee();
+                    token = giteeConfig.token;
+                    if (!token) {
+                        console.log(chalk__default["default"].green("您尚未保存gitee token"));
+                        return [2];
+                    }
                     params = qs__default["default"].stringify({
                         access_token: token,
                     });
@@ -300,11 +372,14 @@ function sync(opts) {
                             ppConfig = file;
                         }
                     });
-                    localTime = readFileTime(config.listPath);
+                    localTime = readFileModifyTime(config.listPath);
+                    localCreateTime = readFileCreateTime(config.listPath);
+                    isJustCreate = localTime === localCreateTime;
                     if (opts.show) {
                         if (ppConfig) {
-                            console.log("\u521B\u5EFA\u65F6\u95F4: " + ppConfig["create_time"] + "\n");
-                            console.log(ppConfig["data"]);
+                            console.log("\u521B\u5EFA\u65F6\u95F4: " + dateTimeFormat(ppConfig["create_time"], "yyyy-MM-dd HH:mm:ss"));
+                            console.log("\u6570\u636E\u5982\u4E0B: ");
+                            console.log(ppConfig["data"] ? ppConfig["data"] : "暂无数据，请同步");
                         }
                         else {
                             console.log("远端暂无配置文件");
@@ -334,11 +409,11 @@ function sync(opts) {
                     console.log(chalk__default["default"].green("数据强制同步成功"));
                     return [2];
                 case 8:
-                    if (opts.pull) {
+                    if (opts.pull || isJustCreate) {
                         if (ppConfig && ppConfig["create_time"]) {
                             data = ppConfig["data"];
-                            writeIniFile(config.listPath, data);
-                            console.log(chalk__default["default"].green("强制拉取成功"));
+                            syncWriteFile(config.listPath, data);
+                            console.log(chalk__default["default"].green("拉取成功"));
                         }
                         else {
                             console.log(chalk__default["default"].green("远端未找到配置文件"));
@@ -352,7 +427,7 @@ function sync(opts) {
                             syncFile(ppId, localTime);
                         }
                         else if (localTime < createTime) {
-                            writeIniFile(config.listPath, data);
+                            syncWriteFile(config.listPath, data);
                             console.log(chalk__default["default"].green("本地数据同步成功"));
                         }
                         else {
@@ -411,7 +486,7 @@ function POST(id, data) {
     var token = giteeConfig.token;
     var url = "https://gitee.com/api/v5/gists";
     var requestInfo = new fetch.Request(id ? url + "/" + id : url, {
-        method: "POST",
+        method: id ? "PATCH" : 'POST',
         body: qs__default["default"].stringify({
             access_token: token,
             files: {
@@ -438,11 +513,23 @@ function onList(opt) {
     }
     keys.forEach(function (key) {
         var value = data[key];
+        if (opt === null || opt === void 0 ? void 0 : opt.tag) {
+            if (!value.tag) {
+                return;
+            }
+            var tagList = opt.tag.split(',');
+            var tags_1 = value.tag.split(',');
+            var filterTags = tagList.filter(function (v) { return tags_1.includes(v); });
+            if (!filterTags.length) {
+                console.log("暂无此标签的模板");
+                return;
+            }
+        }
         if (opt === null || opt === void 0 ? void 0 : opt.all) {
-            console.log(key + (value.desc ? "(" + value.desc + ")" : "") + (": " + value.url));
+            console.log(key + (value.desc ? "(" + value.desc + ")" : "") + (value.tag ? "[" + value.tag + "]" : "") + (": " + value.url));
         }
         else {
-            console.log(key + (value.desc ? "(" + value.desc + ")" : ""));
+            console.log(key + (value.desc ? "(" + value.desc + ")" : "") + (value.tag ? "[" + value.tag + "]" : ""));
         }
     });
 }
@@ -457,14 +544,14 @@ function onCopy(templateDir, opts) {
     }
     writefile(templateDir, opts.targetDir);
 }
-function onClone(name, opts) {
+function onClone(name, target) {
     var item = Data.getInstance().findOne(name);
     if (!item) {
-        console.log("请先添加项目");
+        console.log("\u8BF7\u5148\u6DFB\u52A0\u8BE5\u9879\u76EE");
         return;
     }
     var tempPath = path__default["default"].join(os__default["default"].tmpdir(), "pp-" + uuid__default["default"].v4());
-    var to = opts.dir;
+    var to = target;
     var git_url = "direct:" + item.url;
     if (isExist(to)) {
         console.log(chalk__default["default"].red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹"));
@@ -490,18 +577,18 @@ function onRemove(name) {
         console.error(chalk__default["default"].red("不存在该模板"));
     }
 }
-function onAdd(url, opt) {
+function onAdd(url, name, opt) {
     var http = /^(http|https)\:\/\//g;
     var git = /(git|root)\@/g;
     if (!git.test(url) && !http.test(url)) {
         console.error(chalk__default["default"].red("请添加正确的Git仓库地址"));
         return;
     }
-    Data.getInstance().addUrl(tslib.__assign(tslib.__assign({}, opt), { url: url }));
+    Data.getInstance().addUrl(tslib.__assign(tslib.__assign({}, opt), { url: url, name: name }));
     console.log(chalk__default["default"].green("添加成功"));
 }
 function onCheck() {
-    console.log(JSON.stringify(Data.getInstance().getData()));
+    console.log(ini__default["default"].stringify(Data.getInstance().getData()));
 }
 
 var program = new commander.Command();
@@ -512,11 +599,10 @@ program.command("login <token>").description("本地保存Gitee的私人令牌")
 program.command("whoami").description("查看私人令牌").action(Whoami);
 program.command("logout").description("删除私人令牌").action(onLogOut);
 program.command("sync").option('-f --force', "强制同步").option('-d --delete', "删除远端").option('-s --show', "查看远端").option('-p --pull', "强制拉取远端").description("同步模板列表").action(sync);
-program.command("list").option('-a --all').description("查看所有模板列表").action(onList);
+program.command("list").option('-a --all').option('-t --tag <tag>', "标签筛选").description("查看所有模板列表").action(onList);
 program.command("check").description("查看配置文件").action(onCheck);
 program
-    .command("add <url>")
-    .requiredOption("-n --name <name>", "模板名字")
+    .command("add <url> <name>")
     .option("-d --desc <desc>", "模板具体描述")
     .option("-t --tag <tag>", "模板标签")
     .description("添加一个模板仓库")
@@ -525,7 +611,7 @@ program
     .command("remove <name>")
     .description("删除一个模板仓库")
     .action(onRemove);
-program.command("clone <name>").requiredOption("-d --dir <target>", "目标路径").description("克隆模板仓库").action(onClone);
+program.command("clone <name> <target>").description("克隆模板仓库").action(onClone);
 program.command("copy <templateDir>").requiredOption("-d --targetDir <targetDir>", "目标路径").description("简单文件夹克隆").action(onCopy);
 program.parse(process.argv);
 //# sourceMappingURL=pp.cjs.js.map

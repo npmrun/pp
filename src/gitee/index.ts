@@ -5,7 +5,7 @@ import fetch, { Request } from "node-fetch";
 import qs from "qs";
 import ora from "ora";
 import config from "@/config";
-import { readFileTime, writeIniFile } from "@/util";
+import {dateTimeFormat, readFileCreateTime, readFileModifyTime, syncWriteFile, writeIniFile} from "@/util";
 
 export async function onLogin(token: string) {
   const res = await (
@@ -14,6 +14,7 @@ export async function onLogin(token: string) {
   if (res.message) {
     console.log(res.message);
     console.log(chalk.red("无效私人令牌"));
+    return
   }
   Config.getInstance().setGitee({
     token,
@@ -26,11 +27,20 @@ export function onLogOut() {
   console.log(chalk.green("已清除gitee"));
 }
 
-export function Whoami() {
+export async function Whoami() {
   let giteeConfig = Config.getInstance().getGitee();
   let token = giteeConfig.token;
   if (token) {
     console.log(chalk.green("gitee token: ") + chalk.greenBright(token));
+    const res = await (
+      await fetch("https://gitee.com/api/v5/user?access_token=" + token)
+    ).json();
+    if (res.message) {
+      console.log(res.message);
+      console.log(chalk.red("私人令牌已失效"));
+      return
+    }
+    console.log(chalk.green(`有效私人令牌，欢迎您: ${res.name}(${res.login})`));
   } else {
     console.log(chalk.green("您尚未保存gitee token"));
   }
@@ -44,6 +54,10 @@ export async function sync(opts: {
 }) {
   let giteeConfig = Config.getInstance().getGitee();
   let token = giteeConfig.token;
+  if(!token){
+    console.log(chalk.green("您尚未保存gitee token"));
+    return
+  }
   let params = qs.stringify({
     access_token: token,
   });
@@ -68,11 +82,14 @@ export async function sync(opts: {
       ppConfig = file;
     }
   });
-  let localTime = readFileTime(config.listPath);
+  let localTime = readFileModifyTime(config.listPath);
+  let localCreateTime = readFileCreateTime(config.listPath);
+  let isJustCreate = localTime === localCreateTime;
   if (opts.show) {
     if (ppConfig) {
-      console.log(`创建时间: ` + ppConfig["create_time"] + "\n");
-      console.log(ppConfig["data"]);
+      console.log(`创建时间: ` + dateTimeFormat(ppConfig["create_time"],"yyyy-MM-dd HH:mm:ss"));
+      console.log(`数据如下: `);
+      console.log(ppConfig["data"]?ppConfig["data"]:"暂无数据，请同步");
     } else {
       console.log("远端暂无配置文件");
     }
@@ -101,11 +118,11 @@ export async function sync(opts: {
     console.log(chalk.green("数据强制同步成功"));
     return;
   }
-  if (opts.pull) {
+  if (opts.pull || isJustCreate) {
     if (ppConfig && ppConfig["create_time"]) {
       let data = ppConfig["data"];
-      writeIniFile(config.listPath, data);
-      console.log(chalk.green("强制拉取成功"));
+      syncWriteFile(config.listPath, data);
+      console.log(chalk.green("拉取成功"));
     } else {
       console.log(chalk.green("远端未找到配置文件"));
     }
@@ -118,7 +135,7 @@ export async function sync(opts: {
     if (localTime > createTime) {
       syncFile(ppId, localTime);
     } else if (localTime < createTime) {
-      writeIniFile(config.listPath, data);
+      syncWriteFile(config.listPath, data);
       console.log(chalk.green("本地数据同步成功"));
     } else {
       console.log(chalk.green("配置文件数据一致"));
@@ -168,7 +185,7 @@ function POST(id: any, data: string) {
   let token = giteeConfig.token;
   let url = "https://gitee.com/api/v5/gists";
   const requestInfo = new Request(id ? url + "/" + id : url, {
-    method: "POST",
+    method: id ? "PATCH": 'POST',
     body: qs.stringify({
       access_token: token,
       files: {
