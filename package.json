@@ -1,6 +1,6 @@
 {
   "name": "@noderun/pp",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "命令行管理模板项目",
   "main": "dist/pp.umd.js",
   "module": "dist/pp.esm.js",
@@ -44,27 +44,27 @@
     "@types/node-fetch": "2",
     "@types/qs": "^6.9.7",
     "@types/uuid": "^8.3.1",
-    "chalk": "^4.1.2",
     "cross-env": "^7.0.3",
     "dts-bundle": "^0.7.3",
     "execa": "^4.0.3",
-    "fs-extra": "^9.0.1",
     "inquirer": "^8.2.0",
     "lodash": "^4.17.20",
-    "ora": "5.4.1",
     "rollup": "^2.26.3",
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-typescript2": "^0.27.2",
-    "tslib": "^2.0.1",
     "typescript": "^4.4.4"
   },
   "dependencies": {
+    "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "download-git-repo": "^3.0.2",
     "ejs": "^3.1.6",
+    "fs-extra": "^9.0.1",
     "ini": "^2.0.0",
     "node-fetch": "2",
+    "ora": "5.4.1",
     "qs": "^6.10.1",
+    "tslib": "^2.0.1",
     "uuid": "^8.3.2"
   }
 }
