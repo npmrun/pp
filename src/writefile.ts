@@ -31,6 +31,8 @@ export function isExist (file: string) {
   return result
 }
 
+const exclude = ['.png','.jpg','.jpeg','.zip','.rar','.webp']
+
 export default function writefile (fromDir: string, toDir: string, opts = {}, force = false) {
   if (!fromDir) {
     console.log(chalk.red("缺少模板目录"))
@@ -54,8 +56,13 @@ export default function writefile (fromDir: string, toDir: string, opts = {}, fo
       encoding: "utf8",
     });
     try{
-      const html = ejs.render(originRoot, opts);
-      fs.writeFileSync(toRes, html);
+      let ext = path.parse(fromRes).ext
+      if(exclude.includes(ext)){
+        fs.copyFileSync(fromRes, toRes)
+      }else {
+        const html = ejs.render(originRoot, opts);
+        fs.writeFileSync(toRes, html);
+      }
     }catch (e) {
       errorFile.push(toRes)
       errors.push(e)

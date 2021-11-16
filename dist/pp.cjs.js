@@ -150,6 +150,15 @@ var Data = (function () {
         var data = this.getData();
         return data[name];
     };
+    Data.prototype.modifyUrl = function (name, opts) {
+        var data = this.findOne(name);
+        Object.keys(opts).forEach(function (v) {
+            if (opts[v] != undefined) {
+                data[v] = opts[v];
+            }
+        });
+        this.sync();
+    };
     Data.prototype.addUrl = function (opts) {
         var data = this.getData();
         if (!data[opts.name]) {
@@ -229,6 +238,7 @@ function isExist(file) {
     }
     return result;
 }
+var exclude = ['.png', '.jpg', '.jpeg', '.zip', '.rar', '.webp'];
 function writefile(fromDir, toDir, opts, force) {
     if (opts === void 0) { opts = {}; }
     if (force === void 0) { force = false; }
@@ -254,8 +264,14 @@ function writefile(fromDir, toDir, opts, force) {
             encoding: "utf8",
         });
         try {
-            var html = ejs__default["default"].render(originRoot, opts);
-            fs__default["default"].writeFileSync(toRes, html);
+            var ext = path__default["default"].parse(fromRes).ext;
+            if (exclude.includes(ext)) {
+                fs__default["default"].copyFileSync(fromRes, toRes);
+            }
+            else {
+                var html = ejs__default["default"].render(originRoot, opts);
+                fs__default["default"].writeFileSync(toRes, html);
+            }
         }
         catch (e) {
             errorFile.push(toRes);
@@ -542,7 +558,21 @@ function onCopy(templateDir, opts) {
         console.log(chalk__default["default"].red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹"));
         return;
     }
-    writefile(templateDir, opts.targetDir);
+    var vars = {};
+    if (opts.p) {
+        try {
+            opts.p.split(',').forEach(function (v) {
+                var temp = v.split(":");
+                if (temp[0] != undefined && temp[1] != undefined) {
+                    vars[temp[0]] = temp[1];
+                }
+            });
+        }
+        catch (e) {
+            console.log(chalk__default["default"].red("您存储的变量解析出错了，请先检查"));
+        }
+    }
+    writefile(templateDir, opts.targetDir, vars);
 }
 function onClone(name, target) {
     var item = Data.getInstance().findOne(name);
@@ -556,6 +586,20 @@ function onClone(name, target) {
     if (isExist(to)) {
         console.log(chalk__default["default"].red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹"));
         return;
+    }
+    var opts = {};
+    if (item.p) {
+        try {
+            item.p.split(',').forEach(function (v) {
+                var temp = v.split(":");
+                if (temp[0] != undefined && temp[1] != undefined) {
+                    opts[temp[0]] = temp[1];
+                }
+            });
+        }
+        catch (e) {
+            console.log(chalk__default["default"].red("您存储的变量解析出错了，请先检查"));
+        }
     }
     download__default["default"](git_url, tempPath, { clone: true }, function (err) {
         if (err)
@@ -576,6 +620,16 @@ function onRemove(name) {
     else {
         console.error(chalk__default["default"].red("不存在该模板"));
     }
+}
+function onModify(name, opt) {
+    var http = /^(http|https)\:\/\//g;
+    var git = /(git|root)\@/g;
+    if (opt.url && !git.test(opt.url) && !http.test(opt.url)) {
+        console.error(chalk__default["default"].red("请添加正确的Git仓库地址"));
+        return;
+    }
+    Data.getInstance().modifyUrl(name, opt);
+    console.log(chalk__default["default"].green("修改成功"));
 }
 function onAdd(url, name, opt) {
     var http = /^(http|https)\:\/\//g;
@@ -605,13 +659,25 @@ program
     .command("add <url> <name>")
     .option("-d --desc <desc>", "模板具体描述")
     .option("-t --tag <tag>", "模板标签")
+    .option("-v --var <var>", "模板变量")
     .description("添加一个模板仓库")
     .action(onAdd);
+program
+    .command("m <name>")
+    .option("-d --desc <desc>", "模板具体描述")
+    .option("-t --tag <tag>", "模板标签")
+    .option("-u --url <url>", "仓库地址")
+    .option("-p --p <p>", "模板变量")
+    .description("修改模板仓库")
+    .action(onModify);
 program
     .command("remove <name>")
     .description("删除一个模板仓库")
     .action(onRemove);
 program.command("clone <name> <target>").description("克隆模板仓库").action(onClone);
-program.command("copy <templateDir>").requiredOption("-d --targetDir <targetDir>", "目标路径").description("简单文件夹克隆").action(onCopy);
+program.command("copy <templateDir>")
+    .requiredOption("-d --targetDir <targetDir>", "目标路径")
+    .option("-p --p <p>", "模板变量")
+    .description("简单文件夹克隆").action(onCopy);
 program.parse(process.argv);
 //# sourceMappingURL=pp.cjs.js.map

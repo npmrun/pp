@@ -6,7 +6,7 @@ import config from "@/config";
 import {readIniFile, writeIniFile} from "@/util";
 
 const dataPath = config.listPath
-
+type a = keyof { url?: string, desc?:string, p?: string, tag?: string}
 /**
  * 读取配置
  */
@@ -45,6 +45,16 @@ export default class Data {
   findOne(name: string){
     let data = this.getData()
     return data[name]
+  }
+
+  modifyUrl(name: string, opts: { url?: string, desc?:string, p?: string, tag?: string}){
+    let data = this.findOne(name);
+    (Object.keys(opts) as a[]).forEach((v:a)=>{
+      if(opts[v]!=undefined){
+        data[v] = opts[v]
+      }
+    })
+    this.sync()
   }
 
   addUrl(opts: { url: string, name: string, desc?:string, force?: boolean}){

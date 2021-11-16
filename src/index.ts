@@ -24,15 +24,26 @@ program
   .command("add <url> <name>")
   .option("-d --desc <desc>", "模板具体描述")
   .option("-t --tag <tag>", "模板标签")
+  .option("-v --var <var>", "模板变量")
   .description("添加一个模板仓库")
   .action(func.onAdd);
-
+program
+  .command("m <name>")
+  .option("-d --desc <desc>", "模板具体描述")
+  .option("-t --tag <tag>", "模板标签")
+  .option("-u --url <url>", "仓库地址")
+  .option("-p --p <p>", "模板变量")
+  .description("修改模板仓库")
+  .action(func.onModify);
 program
   .command("remove <name>")
   .description("删除一个模板仓库")
   .action(func.onRemove);
 
 program.command("clone <name> <target>").description("克隆模板仓库").action(func.onClone);
-program.command("copy <templateDir>").requiredOption("-d --targetDir <targetDir>", "目标路径").description("简单文件夹克隆").action(func.onCopy);
+program.command("copy <templateDir>")
+  .requiredOption("-d --targetDir <targetDir>", "目标路径")
+  .option("-p --p <p>", "模板变量")
+  .description("简单文件夹克隆").action(func.onCopy);
 
 program.parse(process.argv);

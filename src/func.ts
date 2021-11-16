@@ -70,7 +70,7 @@ export function onList(opt?: { all?: boolean, tag:string }) {
   });
 }
 
-export function onCopy(templateDir: string, opts: { targetDir: string }){
+export function onCopy(templateDir: string, opts: { targetDir: string, p:string }){
   if(!isExist(templateDir)){
     console.log(
       chalk.red("请提供模板目录")
@@ -83,7 +83,23 @@ export function onCopy(templateDir: string, opts: { targetDir: string }){
     );
     return;
   }
-  writefile(templateDir, opts.targetDir);
+  let vars = {}
+  if(opts.p){
+    try{
+      opts.p.split(',').forEach((v:string)=>{
+        let temp = v.split(":")
+        if (temp[0]!=undefined&&temp[1]!=undefined){
+          // @ts-ignore
+          vars[temp[0]] = temp[1]
+        }
+      })
+    }catch (e) {
+      console.log(
+        chalk.red("您存储的变量解析出错了，请先检查")
+      );
+    }
+  }
+  writefile(templateDir, opts.targetDir, vars);
 }
 
 export function onClone(name: string, target: string) {
@@ -100,6 +116,22 @@ export function onClone(name: string, target: string) {
       chalk.red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹")
     );
     return;
+  }
+  let opts = {}
+  if(item.p){
+    try{
+      item.p.split(',').forEach((v:string)=>{
+        let temp = v.split(":")
+        if (temp[0]!=undefined&&temp[1]!=undefined){
+          // @ts-ignore
+          opts[temp[0]] = temp[1]
+        }
+      })
+    }catch (e) {
+      console.log(
+        chalk.red("您存储的变量解析出错了，请先检查")
+      );
+    }
   }
   download(git_url, tempPath, { clone: true }, function (err: Error) {
     if (err) throw err;
@@ -121,7 +153,18 @@ export function onRemove(name: string) {
   }
 }
 
-export function onAdd(url: string, name: string, opt: { desc?: string,tag?:string }) {
+export function onModify(name: string, opt: { desc?: string, url?:string,tag?:string,p?:string }) {
+  const http = /^(http|https)\:\/\//g;
+  const git = /(git|root)\@/g;
+  if (opt.url&&!git.test(opt.url) && !http.test(opt.url)) {
+    console.error(chalk.red("请添加正确的Git仓库地址"));
+    return;
+  }
+  Data.getInstance().modifyUrl(name, opt);
+  console.log(chalk.green("修改成功"));
+}
+
+export function onAdd(url: string, name: string, opt: { desc?: string,tag?:string,var?:string }) {
   const http = /^(http|https)\:\/\//g;
   const git = /(git|root)\@/g;
   if (!git.test(url) && !http.test(url)) {
