@@ -639,6 +639,10 @@ function onAdd(url, name, opt) {
         console.error(chalk__default["default"].red("请添加正确的Git仓库地址"));
         return;
     }
+    if (Data.getInstance().findOne(name)) {
+        console.error(chalk__default["default"].red("已存在的name,请更换一个"));
+        return;
+    }
     Data.getInstance().addUrl(tslib.__assign(tslib.__assign({}, opt), { url: url, name: name }));
     console.log(chalk__default["default"].green("添加成功"));
 }

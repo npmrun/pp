@@ -171,6 +171,10 @@ export function onAdd(url: string, name: string, opt: { desc?: string,tag?:strin
     console.error(chalk.red("请添加正确的Git仓库地址"));
     return;
   }
+  if(Data.getInstance().findOne(name)){
+    console.error(chalk.red("已存在的name,请更换一个"));
+    return
+  }
   Data.getInstance().addUrl({...opt, url: url, name: name});
   console.log(chalk.green("添加成功"));
 }
