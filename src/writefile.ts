@@ -33,7 +33,7 @@ export function isExist (file: string) {
 
 const exclude = ['.png','.jpg','.jpeg','.zip','.rar','.webp']
 
-export default function writefile (fromDir: string, toDir: string, opts = {}, force = false) {
+export default function writefile (fromDir: string, toDir: string, opts = {}, force = false, isEjs = true) {
   if (!fromDir) {
     console.log(chalk.red("缺少模板目录"))
     return
@@ -57,7 +57,7 @@ export default function writefile (fromDir: string, toDir: string, opts = {}, fo
     });
     try{
       let ext = path.parse(fromRes).ext
-      if(exclude.includes(ext)){
+      if(exclude.includes(ext) || !isEjs){
         fs.copyFileSync(fromRes, toRes)
       }else {
         const html = ejs.render(originRoot, opts);

@@ -102,7 +102,7 @@ export function onCopy(templateDir: string, opts: { targetDir: string, p:string 
   writefile(templateDir, opts.targetDir, vars);
 }
 
-export function onClone(name: string, target: string) {
+export function onClone(name: string, target: string, cc: { ignore?:boolean }) {
   const item = Data.getInstance().findOne(name)
   if (!item) {
     console.log(`请先添加该项目`);
@@ -136,7 +136,7 @@ export function onClone(name: string, target: string) {
   download(git_url, tempPath, { clone: true }, function (err: Error) {
     if (err) throw err;
     console.log("临时文件夹为:" + tempPath);
-    writefile(tempPath, to, { name: "哈哈" });
+    writefile(tempPath, to, opts, false, !cc.ignore);
     fs.removeSync(tempPath);
     console.log(chalk.green("已清除临时文件夹"));
     console.log(chalk.green("克隆成功"));

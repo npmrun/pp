@@ -239,9 +239,10 @@ function isExist(file) {
     return result;
 }
 var exclude = ['.png', '.jpg', '.jpeg', '.zip', '.rar', '.webp'];
-function writefile(fromDir, toDir, opts, force) {
+function writefile(fromDir, toDir, opts, force, isEjs) {
     if (opts === void 0) { opts = {}; }
     if (force === void 0) { force = false; }
+    if (isEjs === void 0) { isEjs = true; }
     if (!fromDir) {
         console.log(chalk__default["default"].red("缺少模板目录"));
         return;
@@ -265,7 +266,7 @@ function writefile(fromDir, toDir, opts, force) {
         });
         try {
             var ext = path__default["default"].parse(fromRes).ext;
-            if (exclude.includes(ext)) {
+            if (exclude.includes(ext) || !isEjs) {
                 fs__default["default"].copyFileSync(fromRes, toRes);
             }
             else {
@@ -574,7 +575,7 @@ function onCopy(templateDir, opts) {
     }
     writefile(templateDir, opts.targetDir, vars);
 }
-function onClone(name, target) {
+function onClone(name, target, cc) {
     var item = Data.getInstance().findOne(name);
     if (!item) {
         console.log("\u8BF7\u5148\u6DFB\u52A0\u8BE5\u9879\u76EE");
@@ -605,7 +606,7 @@ function onClone(name, target) {
         if (err)
             throw err;
         console.log("临时文件夹为:" + tempPath);
-        writefile(tempPath, to, { name: "哈哈" });
+        writefile(tempPath, to, opts, false, !cc.ignore);
         fs__default["default"].removeSync(tempPath);
         console.log(chalk__default["default"].green("已清除临时文件夹"));
         console.log(chalk__default["default"].green("克隆成功"));
@@ -674,7 +675,7 @@ program
     .command("remove <name>")
     .description("删除一个模板仓库")
     .action(onRemove);
-program.command("clone <name> <target>").description("克隆模板仓库").action(onClone);
+program.command("clone <name> <target>").option("-i --ignore", "是否不需要模板变量").description("克隆模板仓库").action(onClone);
 program.command("copy <templateDir>")
     .requiredOption("-d --targetDir <targetDir>", "目标路径")
     .option("-p --p <p>", "模板变量")

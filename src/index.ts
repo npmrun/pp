@@ -40,7 +40,7 @@ program
   .description("删除一个模板仓库")
   .action(func.onRemove);
 
-program.command("clone <name> <target>").description("克隆模板仓库").action(func.onClone);
+program.command("clone <name> <target>").option("-i --ignore", "是否不需要模板变量").description("克隆模板仓库").action(func.onClone);
 program.command("copy <templateDir>")
   .requiredOption("-d --targetDir <targetDir>", "目标路径")
   .option("-p --p <p>", "模板变量")
