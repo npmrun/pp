@@ -133,7 +133,8 @@ export function onClone(name: string, target: string, cc: { ignore?:boolean }) {
       );
     }
   }
-  download(git_url, tempPath, { clone: true }, function (err: Error) {
+  const branch = item.branch;
+  download(branch?git_url+'#'+branch:git_url, tempPath, { clone: true }, function (err: Error) {
     if (err) throw err;
     console.log("临时文件夹为:" + tempPath);
     writefile(tempPath, to, opts, false, !cc.ignore);
@@ -153,7 +154,7 @@ export function onRemove(name: string) {
   }
 }
 
-export function onModify(name: string, opt: { desc?: string, url?:string,tag?:string,p?:string }) {
+export function onModify(name: string, opt: { desc?: string, url?:string,tag?:string,p?:string,branch?: string }) {
   const http = /^(http|https)\:\/\//g;
   const git = /(git|root)\@/g;
   if (opt.url&&!git.test(opt.url) && !http.test(opt.url)) {
@@ -164,7 +165,7 @@ export function onModify(name: string, opt: { desc?: string, url?:string,tag?:st
   console.log(chalk.green("修改成功"));
 }
 
-export function onAdd(url: string, name: string, opt: { desc?: string,tag?:string,var?:string }) {
+export function onAdd(url: string, name: string, opt: { desc?: string,tag?:string,var?:string,branch?: string }) {
   const http = /^(http|https)\:\/\//g;
   const git = /(git|root)\@/g;
   if (!git.test(url) && !http.test(url)) {

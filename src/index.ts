@@ -25,6 +25,7 @@ program
   .option("-d --desc <desc>", "模板具体描述")
   .option("-t --tag <tag>", "模板标签")
   .option("-v --var <var>", "模板变量")
+  .option("-b --branch <branch>", "仓库分支")
   .description("添加一个模板仓库")
   .action(func.onAdd);
 program
@@ -33,6 +34,7 @@ program
   .option("-t --tag <tag>", "模板标签")
   .option("-u --url <url>", "仓库地址")
   .option("-p --p <p>", "模板变量")
+  .option("-b --branch <branch>", "仓库分支")
   .description("修改模板仓库")
   .action(func.onModify);
 program
