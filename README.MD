@@ -1,5 +1,7 @@
 # @noderun/pp
 
+> 有需求可话发送至邮箱`1549469775@qq.com`
+
 ### 安装
 ```bash
 npm i @noderun/pp -g
