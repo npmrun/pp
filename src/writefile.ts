@@ -60,8 +60,12 @@ export default function writefile (fromDir: string, toDir: string, opts = {}, fo
       if(exclude.includes(ext) || !isEjs){
         fs.copyFileSync(fromRes, toRes)
       }else {
-        const html = ejs.render(originRoot, opts);
-        fs.writeFileSync(toRes, html);
+        if (Object.keys(opts).length) {
+          const html = ejs.render(originRoot, opts);
+          fs.writeFileSync(toRes, html);
+        }else {
+          fs.writeFileSync(toRes, originRoot);
+        }
       }
     }catch (e) {
       errorFile.push(toRes)

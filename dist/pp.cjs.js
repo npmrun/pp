@@ -270,8 +270,13 @@ function writefile(fromDir, toDir, opts, force, isEjs) {
                 fs__default["default"].copyFileSync(fromRes, toRes);
             }
             else {
-                var html = ejs__default["default"].render(originRoot, opts);
-                fs__default["default"].writeFileSync(toRes, html);
+                if (Object.keys(opts).length) {
+                    var html = ejs__default["default"].render(originRoot, opts);
+                    fs__default["default"].writeFileSync(toRes, html);
+                }
+                else {
+                    fs__default["default"].writeFileSync(toRes, originRoot);
+                }
             }
         }
         catch (e) {
