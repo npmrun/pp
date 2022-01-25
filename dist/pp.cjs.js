@@ -664,7 +664,7 @@ program.command("login <token>").description("本地保存Gitee的私人令牌")
 program.command("whoami").description("查看私人令牌").action(Whoami);
 program.command("logout").description("删除私人令牌").action(onLogOut);
 program.command("sync").option('-f --force', "强制同步").option('-d --delete', "删除远端").option('-s --show', "查看远端").option('-p --pull', "强制拉取远端").description("同步模板列表").action(sync);
-program.command("list").option('-a --all').option('-t --tag <tag>', "标签筛选").description("查看所有模板列表").action(onList);
+program.command("list").alias('ls').option('-a --all').option('-t --tag <tag>', "标签筛选").description("查看所有模板列表").action(onList);
 program.command("check").description("查看配置文件").action(onCheck);
 program
     .command("add <url> <name>")

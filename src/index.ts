@@ -16,7 +16,7 @@ program.command("whoami").description("查看私人令牌").action(func.Whoami);
 program.command("logout").description("删除私人令牌").action(func.onLogOut);
 program.command("sync").option('-f --force', "强制同步").option('-d --delete', "删除远端").option('-s --show', "查看远端").option('-p --pull', "强制拉取远端").description("同步模板列表").action(func.sync);
 
-program.command("list").option('-a --all').option('-t --tag <tag>', "标签筛选").description("查看所有模板列表").action(func.onList);
+program.command("list").alias('ls').option('-a --all').option('-t --tag <tag>', "标签筛选").description("查看所有模板列表").action(func.onList);
 
 program.command("check").description("查看配置文件").action(func.onCheck);
 
