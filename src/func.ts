@@ -152,6 +152,7 @@ export function onRemove(name: string) {
   } else {
     console.error(chalk.red("不存在该模板"));
   }
+  console.log(chalk.red("删除后请记得同步内容"));
 }
 
 export function onModify(name: string, opt: { desc?: string, url?:string,tag?:string,p?:string,branch?: string }) {
@@ -163,6 +164,7 @@ export function onModify(name: string, opt: { desc?: string, url?:string,tag?:st
   }
   Data.getInstance().modifyUrl(name, opt);
   console.log(chalk.green("修改成功"));
+  console.log(chalk.red("修改后请记得同步内容"));
 }
 
 export function onAdd(url: string, name: string, opt: { desc?: string,tag?:string,var?:string,branch?: string }) {
@@ -178,6 +180,7 @@ export function onAdd(url: string, name: string, opt: { desc?: string,tag?:strin
   }
   Data.getInstance().addUrl({...opt, url: url, name: name});
   console.log(chalk.green("添加成功"));
+  console.log(chalk.red("添加后请记得同步内容"));
 }
 
 export function onCheck() {

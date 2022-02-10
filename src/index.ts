@@ -5,7 +5,7 @@ import * as func from "./func";
 // console.log(os.tmpdir());
 
 const program = new Command();
-program.version("0.0.1", "-v, --version").description("查看当前版本号");
+program.version("0.0.15", "-v, --version").description("查看当前版本号");
 program.helpOption("-h --help", "显示帮助信息");
 program.showHelpAfterError("( pp -h 查看帮助信息)");
 

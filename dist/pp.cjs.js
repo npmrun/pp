@@ -627,6 +627,7 @@ function onRemove(name) {
     else {
         console.error(chalk__default["default"].red("不存在该模板"));
     }
+    console.log(chalk__default["default"].red("删除后请记得同步内容"));
 }
 function onModify(name, opt) {
     var http = /^(http|https)\:\/\//g;
@@ -637,6 +638,7 @@ function onModify(name, opt) {
     }
     Data.getInstance().modifyUrl(name, opt);
     console.log(chalk__default["default"].green("修改成功"));
+    console.log(chalk__default["default"].red("修改后请记得同步内容"));
 }
 function onAdd(url, name, opt) {
     var http = /^(http|https)\:\/\//g;
@@ -651,13 +653,14 @@ function onAdd(url, name, opt) {
     }
     Data.getInstance().addUrl(tslib.__assign(tslib.__assign({}, opt), { url: url, name: name }));
     console.log(chalk__default["default"].green("添加成功"));
+    console.log(chalk__default["default"].red("添加后请记得同步内容"));
 }
 function onCheck() {
     console.log(ini__default["default"].stringify(Data.getInstance().getData()));
 }
 
 var program = new commander.Command();
-program.version("0.0.1", "-v, --version").description("查看当前版本号");
+program.version("0.0.15", "-v, --version").description("查看当前版本号");
 program.helpOption("-h --help", "显示帮助信息");
 program.showHelpAfterError("( pp -h 查看帮助信息)");
 program.command("login <token>").description("本地保存Gitee的私人令牌").action(onLogin);
