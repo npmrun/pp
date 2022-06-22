@@ -548,10 +548,10 @@ function onList(opt) {
             }
         }
         if (opt === null || opt === void 0 ? void 0 : opt.all) {
-            console.log(key + (value.desc ? "(" + value.desc + ")" : "") + (value.tag ? "[" + value.tag + "]" : "") + (": " + value.url));
+            console.log(key + (value.desc ? "(" + value.desc + ")" : "") + (value.tag ? "[" + value.tag + "]" : "") + (value.branch ? "{" + value.branch + "}" : "") + (": " + value.url));
         }
         else {
-            console.log(key + (value.desc ? "(" + value.desc + ")" : "") + (value.tag ? "[" + value.tag + "]" : ""));
+            console.log(key + (value.desc ? "(" + value.desc + ")" : "") + (value.tag ? "[" + value.tag + "]" : "") + (value.branch ? "{" + value.branch + "}" : ""));
         }
     });
 }

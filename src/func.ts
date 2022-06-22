@@ -62,10 +62,10 @@ export function onList(opt?: { all?: boolean, tag:string }) {
     }
     if (opt?.all) {
       console.log(
-        key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : "") + `: ${value.url}`
+        key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : "") + (value.branch ? `{${value.branch}}` : "") + `: ${value.url}`
       );
     } else {
-      console.log(key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : ""));
+      console.log(key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : "") + (value.branch ? `{${value.branch}}` : ""));
     }
   });
 }
