@@ -137,6 +137,7 @@ export function onClone(name: string, target: string, cc: { ignore?:boolean }) {
   download(branch?git_url+'#'+branch:git_url, tempPath, { clone: true }, function (err: Error) {
     if (err) throw err;
     console.log("临时文件夹为:" + tempPath);
+    //TODO 考虑增加命令行交互功能
     writefile(tempPath, to, opts, false, !cc.ignore);
     fs.removeSync(tempPath);
     console.log(chalk.green("已清除临时文件夹"));
