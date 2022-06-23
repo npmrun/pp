@@ -11,6 +11,7 @@ var chalk = require('chalk');
 var uuid = require('uuid');
 var download = require('download-git-repo');
 var ejs = require('ejs');
+var Table = require('cli-table3');
 var fetch = require('node-fetch');
 var qs = require('qs');
 var ora = require('ora');
@@ -25,6 +26,7 @@ var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
 var uuid__default = /*#__PURE__*/_interopDefaultLegacy(uuid);
 var download__default = /*#__PURE__*/_interopDefaultLegacy(download);
 var ejs__default = /*#__PURE__*/_interopDefaultLegacy(ejs);
+var Table__default = /*#__PURE__*/_interopDefaultLegacy(Table);
 var fetch__default = /*#__PURE__*/_interopDefaultLegacy(fetch);
 var qs__default = /*#__PURE__*/_interopDefaultLegacy(qs);
 var ora__default = /*#__PURE__*/_interopDefaultLegacy(ora);
@@ -318,7 +320,7 @@ function onLogin(token) {
                     Config.getInstance().setGitee({
                         token: token,
                     });
-                    console.log(chalk__default["default"].green("\u6709\u6548\u79C1\u4EBA\u4EE4\u724C\uFF0C\u6B22\u8FCE\u60A8: " + res.name + "(" + res.login + ")"));
+                    console.log(chalk__default["default"].green("\u6709\u6548\u79C1\u4EBA\u4EE4\u724C\uFF0C\u6B22\u8FCE\u60A8: ".concat(res.name, "(").concat(res.login, ")")));
                     return [2];
             }
         });
@@ -347,7 +349,7 @@ function Whoami() {
                         console.log(chalk__default["default"].red("私人令牌已失效"));
                         return [2];
                     }
-                    console.log(chalk__default["default"].green("\u6709\u6548\u79C1\u4EBA\u4EE4\u724C\uFF0C\u6B22\u8FCE\u60A8: " + res.name + "(" + res.login + ")"));
+                    console.log(chalk__default["default"].green("\u6709\u6548\u79C1\u4EBA\u4EE4\u724C\uFF0C\u6B22\u8FCE\u60A8: ".concat(res.name, "(").concat(res.login, ")")));
                     return [3, 4];
                 case 3:
                     console.log(chalk__default["default"].green("您尚未保存gitee token"));
@@ -533,7 +535,10 @@ function onList(opt) {
         console.log("暂无模板列表，请自行体添加");
         return;
     }
+    var table = new Table__default["default"]({ head: (opt === null || opt === void 0 ? void 0 : opt.all) ? ["name", "描述", "标签", "分支", "远程"] : ["name", "描述", "标签", "分支"] });
+    var msgs = [];
     keys.forEach(function (key) {
+        var _a, _b;
         var value = data[key];
         if (opt === null || opt === void 0 ? void 0 : opt.tag) {
             if (!value.tag) {
@@ -548,12 +553,20 @@ function onList(opt) {
             }
         }
         if (opt === null || opt === void 0 ? void 0 : opt.all) {
-            console.log(key + (value.desc ? "(" + value.desc + ")" : "") + (value.tag ? "[" + value.tag + "]" : "") + (value.branch ? "{" + value.branch + "}" : "") + (": " + value.url));
+            table.push((_a = {}, _a[key] = [value.desc, value.tag, value.branch, value.url], _a));
+            msgs.push(key + (value.desc ? "(".concat(value.desc, ")") : "") + (value.tag ? "[".concat(value.tag, "]") : "") + (value.branch ? "{".concat(value.branch, "}") : "") + ": ".concat(value.url));
         }
         else {
-            console.log(key + (value.desc ? "(" + value.desc + ")" : "") + (value.tag ? "[" + value.tag + "]" : "") + (value.branch ? "{" + value.branch + "}" : ""));
+            table.push((_b = {}, _b[key] = [value.desc, value.tag, value.branch], _b));
+            msgs.push(key + (value.desc ? "(".concat(value.desc, ")") : "") + (value.tag ? "[".concat(value.tag, "]") : "") + (value.branch ? "{".concat(value.branch, "}") : ""));
         }
     });
+    if (opt === null || opt === void 0 ? void 0 : opt.table) {
+        console.log(table.toString());
+    }
+    else {
+        console.log(msgs.join('\n'));
+    }
 }
 function onCopy(templateDir, opts) {
     if (!isExist(templateDir)) {
@@ -616,7 +629,7 @@ function onClone(name, target, cc) {
         fs__default["default"].removeSync(tempPath);
         console.log(chalk__default["default"].green("已清除临时文件夹"));
         console.log(chalk__default["default"].green("克隆成功"));
-        console.log("\ncd " + to + " && npm install\n");
+        console.log("\ncd ".concat(to, " && npm install\n"));
     });
 }
 function onRemove(name) {
@@ -660,14 +673,14 @@ function onCheck() {
 }
 
 var program = new commander.Command();
-program.version("0.0.15", "-v, --version").description("查看当前版本号");
+program.version("0.0.17", "-v, --version").description("查看当前版本号");
 program.helpOption("-h --help", "显示帮助信息");
 program.showHelpAfterError("( pp -h 查看帮助信息)");
 program.command("login <token>").description("本地保存Gitee的私人令牌").action(onLogin);
 program.command("whoami").description("查看私人令牌").action(Whoami);
 program.command("logout").description("删除私人令牌").action(onLogOut);
 program.command("sync").option('-f --force', "强制同步").option('-d --delete', "删除远端").option('-s --show', "查看远端").option('-p --pull', "强制拉取远端").description("同步模板列表").action(sync);
-program.command("list").alias('ls').option('-a --all').option('-t --tag <tag>', "标签筛选").description("查看所有模板列表").action(onList);
+program.command("list").alias('ls').option('-a --all').option('--table').option('-t --tag <tag>', "标签筛选").description("查看所有模板列表").action(onList);
 program.command("check").description("查看配置文件").action(onCheck);
 program
     .command("add <url> <name>")

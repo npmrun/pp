@@ -7,6 +7,7 @@ import download from "download-git-repo";
 import writefile, {isExist} from "@/writefile";
 import fs from "fs-extra";
 import ini from "ini";
+import Table from "cli-table3"
 
 export * from "./gitee"
 
@@ -39,13 +40,15 @@ export * from "./gitee"
  * 显示保存的列表
  * @param opt 参数: all:是否显示Git地址
  */
-export function onList(opt?: { all?: boolean, tag:string }) {
+export function onList(opt?: { all?: boolean, tag:string, table?: boolean }) {
   const data = Data.getInstance().getData()
   const keys = Object.keys(data)
   if (!data || !keys.length) {
     console.log("暂无模板列表，请自行体添加");
     return;
   }
+  const table = new Table({ head: opt?.all?["name", "描述", "标签", "分支", "远程"]:["name", "描述", "标签", "分支"] });
+  const msgs: string[] = []
   keys.forEach((key) => {
     const value = data[key]
     if(opt?.tag){
@@ -61,13 +64,24 @@ export function onList(opt?: { all?: boolean, tag:string }) {
       }
     }
     if (opt?.all) {
-      console.log(
+      table.push(
+          { [key]: [value.desc, value.tag, value.branch, value.url] }
+      );
+      msgs.push(
         key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : "") + (value.branch ? `{${value.branch}}` : "") + `: ${value.url}`
       );
     } else {
-      console.log(key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : "") + (value.branch ? `{${value.branch}}` : ""));
+      table.push(
+          { [key]: [value.desc, value.tag, value.branch] }
+      );
+      msgs.push(key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : "") + (value.branch ? `{${value.branch}}` : ""));
     }
   });
+  if(opt?.table){
+    console.log(table.toString())
+  }else{
+    console.log(msgs.join('\n'))
+  }
 }
 
 export function onCopy(templateDir: string, opts: { targetDir: string, p:string }){

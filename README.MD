@@ -40,6 +40,7 @@ Commands:
 * [x] 克隆时ejs模板变量渲染
 * [x] 代码整理
 * [x] 同步功能
+* [x] 可展示表格`pp list --table`
 
 TODO
 
