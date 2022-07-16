@@ -28,7 +28,7 @@
     "pp": "./dist/pp.cjs.js"
   },
   "scripts": {
-    "test": "node src/main.js",
+    "doc": "typedoc --out doc src/index.ts",
     "build": "cross-env NODE_ENV=production node scripts/build.js",
     "dev": "cross-env NODE_ENV=development node scripts/dev.js"
   },
@@ -54,10 +54,10 @@
     "rollup": "^2.26.3",
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-typescript2": "^0.27.2",
+    "typedoc": "^0.23.7",
     "typescript": "^4.4.4"
-},
-"dependencies": {
-    "inquirer": "^8.2.0",
+  },
+  "dependencies": {
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.2",
     "commander": "^8.3.0",
@@ -65,6 +65,7 @@
     "ejs": "^3.1.6",
     "fs-extra": "^9.0.1",
     "ini": "^2.0.0",
+    "inquirer": "^8.2.0",
     "node-fetch": "2",
     "ora": "5.4.1",
     "qs": "^6.10.1",
