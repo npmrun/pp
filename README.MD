@@ -41,6 +41,7 @@ Commands:
 * [x] 代码整理
 * [x] 同步功能
 * [x] 可展示表格`pp list --table`
+* [x] 增加`inquirer`自定义项目变量（beta）
 
 TODO
 

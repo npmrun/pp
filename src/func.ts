@@ -8,6 +8,8 @@ import writefile, {isExist} from "@/writefile";
 import fs from "fs-extra";
 import ini from "ini";
 import Table from "cli-table3"
+import inquirer from 'inquirer';
+import { isPromise } from "util/types";
 
 export * from "./gitee"
 
@@ -84,7 +86,26 @@ export function onList(opt?: { all?: boolean, tag:string, table?: boolean }) {
   }
 }
 
-export function onCopy(templateDir: string, opts: { targetDir: string, p:string }){
+async function checkAsk(templateDir: string, vars: object) {
+    let result = {}
+    const askPath = path.resolve(templateDir, "./pp.ask.js")
+    if(fs.pathExistsSync(askPath)){
+        const data = require(askPath)(inquirer);
+        let answers = {}
+        if(!data){
+            throw 'pp.ask.js的输出不符合格式'
+        }
+        if(isPromise(data)){
+            answers = await data
+        }else{
+            answers = await inquirer.prompt(data)
+        }
+        result = Object.assign(result, vars, answers)
+    }
+    return result
+}
+
+export async function onCopy(templateDir: string, opts: { targetDir: string, p:string }){
   if(!isExist(templateDir)){
     console.log(
       chalk.red("请提供模板目录")
@@ -113,6 +134,7 @@ export function onCopy(templateDir: string, opts: { targetDir: string, p:string 
       );
     }
   }
+  vars = await checkAsk(templateDir, vars)
   writefile(templateDir, opts.targetDir, vars);
 }
 
@@ -148,10 +170,11 @@ export function onClone(name: string, target: string, cc: { ignore?:boolean }) {
     }
   }
   const branch = item.branch;
-  download(branch?git_url+'#'+branch:git_url, tempPath, { clone: true }, function (err: Error) {
+  download(branch?git_url+'#'+branch:git_url, tempPath, { clone: true }, async function (err: Error) {
     if (err) throw err;
     console.log("临时文件夹为:" + tempPath);
-    //TODO 考虑增加命令行交互功能
+    //TODO 测试加命令行交互功能
+    opts = await checkAsk(tempPath, opts)
     writefile(tempPath, to, opts, false, !cc.ignore);
     fs.removeSync(tempPath);
     console.log(chalk.green("已清除临时文件夹"));

@@ -12,6 +12,8 @@ var uuid = require('uuid');
 var download = require('download-git-repo');
 var ejs = require('ejs');
 var Table = require('cli-table3');
+var inquirer = require('inquirer');
+var types = require('util/types');
 var fetch = require('node-fetch');
 var qs = require('qs');
 var ora = require('ora');
@@ -27,6 +29,7 @@ var uuid__default = /*#__PURE__*/_interopDefaultLegacy(uuid);
 var download__default = /*#__PURE__*/_interopDefaultLegacy(download);
 var ejs__default = /*#__PURE__*/_interopDefaultLegacy(ejs);
 var Table__default = /*#__PURE__*/_interopDefaultLegacy(Table);
+var inquirer__default = /*#__PURE__*/_interopDefaultLegacy(inquirer);
 var fetch__default = /*#__PURE__*/_interopDefaultLegacy(fetch);
 var qs__default = /*#__PURE__*/_interopDefaultLegacy(qs);
 var ora__default = /*#__PURE__*/_interopDefaultLegacy(ora);
@@ -568,30 +571,73 @@ function onList(opt) {
         console.log(msgs.join('\n'));
     }
 }
+function checkAsk(templateDir, vars) {
+    return tslib.__awaiter(this, void 0, void 0, function () {
+        var result, askPath, data, answers;
+        return tslib.__generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    result = {};
+                    askPath = path__default["default"].resolve(templateDir, "./pp.ask.js");
+                    if (!fs__default["default"].pathExistsSync(askPath)) return [3, 5];
+                    data = require(askPath)(inquirer__default["default"]);
+                    answers = {};
+                    if (!data) {
+                        throw 'pp.ask.js的输出不符合格式';
+                    }
+                    if (!types.isPromise(data)) return [3, 2];
+                    return [4, data];
+                case 1:
+                    answers = _a.sent();
+                    return [3, 4];
+                case 2: return [4, inquirer__default["default"].prompt(data)];
+                case 3:
+                    answers = _a.sent();
+                    _a.label = 4;
+                case 4:
+                    result = Object.assign(result, vars, answers);
+                    _a.label = 5;
+                case 5: return [2, result];
+            }
+        });
+    });
+}
 function onCopy(templateDir, opts) {
-    if (!isExist(templateDir)) {
-        console.log(chalk__default["default"].red("请提供模板目录"));
-        return;
-    }
-    if (isExist(opts.targetDir)) {
-        console.log(chalk__default["default"].red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹"));
-        return;
-    }
-    var vars = {};
-    if (opts.p) {
-        try {
-            opts.p.split(',').forEach(function (v) {
-                var temp = v.split(":");
-                if (temp[0] != undefined && temp[1] != undefined) {
-                    vars[temp[0]] = temp[1];
-                }
-            });
-        }
-        catch (e) {
-            console.log(chalk__default["default"].red("您存储的变量解析出错了，请先检查"));
-        }
-    }
-    writefile(templateDir, opts.targetDir, vars);
+    return tslib.__awaiter(this, void 0, void 0, function () {
+        var vars;
+        return tslib.__generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!isExist(templateDir)) {
+                        console.log(chalk__default["default"].red("请提供模板目录"));
+                        return [2];
+                    }
+                    if (isExist(opts.targetDir)) {
+                        console.log(chalk__default["default"].red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹"));
+                        return [2];
+                    }
+                    vars = {};
+                    if (opts.p) {
+                        try {
+                            opts.p.split(',').forEach(function (v) {
+                                var temp = v.split(":");
+                                if (temp[0] != undefined && temp[1] != undefined) {
+                                    vars[temp[0]] = temp[1];
+                                }
+                            });
+                        }
+                        catch (e) {
+                            console.log(chalk__default["default"].red("您存储的变量解析出错了，请先检查"));
+                        }
+                    }
+                    return [4, checkAsk(templateDir, vars)];
+                case 1:
+                    vars = _a.sent();
+                    writefile(templateDir, opts.targetDir, vars);
+                    return [2];
+            }
+        });
+    });
 }
 function onClone(name, target, cc) {
     var item = Data.getInstance().findOne(name);
@@ -622,14 +668,25 @@ function onClone(name, target, cc) {
     }
     var branch = item.branch;
     download__default["default"](branch ? git_url + '#' + branch : git_url, tempPath, { clone: true }, function (err) {
-        if (err)
-            throw err;
-        console.log("临时文件夹为:" + tempPath);
-        writefile(tempPath, to, opts, false, !cc.ignore);
-        fs__default["default"].removeSync(tempPath);
-        console.log(chalk__default["default"].green("已清除临时文件夹"));
-        console.log(chalk__default["default"].green("克隆成功"));
-        console.log("\ncd ".concat(to, " && npm install\n"));
+        return tslib.__awaiter(this, void 0, void 0, function () {
+            return tslib.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (err)
+                            throw err;
+                        console.log("临时文件夹为:" + tempPath);
+                        return [4, checkAsk(tempPath, opts)];
+                    case 1:
+                        opts = _a.sent();
+                        writefile(tempPath, to, opts, false, !cc.ignore);
+                        fs__default["default"].removeSync(tempPath);
+                        console.log(chalk__default["default"].green("已清除临时文件夹"));
+                        console.log(chalk__default["default"].green("克隆成功"));
+                        console.log("\ncd ".concat(to, " && npm install\n"));
+                        return [2];
+                }
+            });
+        });
     });
 }
 function onRemove(name) {
