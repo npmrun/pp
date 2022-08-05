@@ -105,6 +105,14 @@ async function checkAsk(templateDir: string, vars: object) {
     return result
 }
 
+export async function onAsk(templateDir: string){
+    const vars = await checkAsk(templateDir, {})
+    console.log(
+        chalk.red("Ask变量如下：")
+    );
+    console.log(vars);
+}
+
 export async function onCopy(templateDir: string, opts: { targetDir: string, p:string }){
   if(!isExist(templateDir)){
     console.log(

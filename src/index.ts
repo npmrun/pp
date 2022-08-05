@@ -48,4 +48,7 @@ program.command("copy <templateDir>")
   .option("-p --p <p>", "模板变量")
   .description("简单文件夹克隆").action(func.onCopy);
 
+program.command("ask <templateDir>")
+  .description("测试ask规则").action(func.onAsk);
+
 program.parse(process.argv);

@@ -1,7 +1,5 @@
-console.log(module.paths);
-
 module.exports = (inquirer) => {
-  [
+  return [
     {
       type: "checkbox",
       message: "Select toppings",

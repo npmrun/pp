@@ -601,6 +601,21 @@ function checkAsk(templateDir, vars) {
         });
     });
 }
+function onAsk(templateDir) {
+    return tslib.__awaiter(this, void 0, void 0, function () {
+        var vars;
+        return tslib.__generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, checkAsk(templateDir, {})];
+                case 1:
+                    vars = _a.sent();
+                    console.log(chalk__default["default"].red("Ask变量如下："));
+                    console.log(vars);
+                    return [2];
+            }
+        });
+    });
+}
 function onCopy(templateDir, opts) {
     return tslib.__awaiter(this, void 0, void 0, function () {
         var vars;
@@ -764,5 +779,7 @@ program.command("copy <templateDir>")
     .requiredOption("-d --targetDir <targetDir>", "目标路径")
     .option("-p --p <p>", "模板变量")
     .description("简单文件夹克隆").action(onCopy);
+program.command("ask <templateDir>")
+    .description("测试ask规则").action(onAsk);
 program.parse(process.argv);
 //# sourceMappingURL=pp.cjs.js.map
