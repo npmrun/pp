@@ -181,13 +181,18 @@ export function onClone(name: string, target: string, cc: { ignore?:boolean }) {
   download(branch?git_url+'#'+branch:git_url, tempPath, { clone: true }, async function (err: Error) {
     if (err) throw err;
     console.log("临时文件夹为:" + tempPath);
-    //TODO 测试加命令行交互功能
-    opts = await checkAsk(tempPath, opts)
-    writefile(tempPath, to, opts, false, !cc.ignore);
-    fs.removeSync(tempPath);
-    console.log(chalk.green("已清除临时文件夹"));
-    console.log(chalk.green("克隆成功"));
-    console.log(`\ncd ${to} && npm install\n`);
+    try {
+        opts = await checkAsk(tempPath, opts)
+        writefile(tempPath, to, opts, false, !cc.ignore);
+        fs.removeSync(tempPath);
+        console.log(chalk.green("已清除临时文件夹"));
+        console.log(chalk.green("克隆成功"));
+        console.log(`\ncd ${to} && npm install\n`);
+    } catch (error) {
+        console.error(error);
+        fs.removeSync(tempPath);
+        console.log(chalk.green("已清除临时文件夹"));
+    }
   });
 }
 

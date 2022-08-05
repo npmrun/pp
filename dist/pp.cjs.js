@@ -683,21 +683,32 @@ function onClone(name, target, cc) {
     var branch = item.branch;
     download__default["default"](branch ? git_url + '#' + branch : git_url, tempPath, { clone: true }, function (err) {
         return tslib.__awaiter(this, void 0, void 0, function () {
+            var error_1;
             return tslib.__generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (err)
                             throw err;
                         console.log("临时文件夹为:" + tempPath);
-                        return [4, checkAsk(tempPath, opts)];
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4, checkAsk(tempPath, opts)];
+                    case 2:
                         opts = _a.sent();
                         writefile(tempPath, to, opts, false, !cc.ignore);
                         fs__default["default"].removeSync(tempPath);
                         console.log(chalk__default["default"].green("已清除临时文件夹"));
                         console.log(chalk__default["default"].green("克隆成功"));
                         console.log("\ncd ".concat(to, " && npm install\n"));
-                        return [2];
+                        return [3, 4];
+                    case 3:
+                        error_1 = _a.sent();
+                        console.error(error_1);
+                        fs__default["default"].removeSync(tempPath);
+                        console.log(chalk__default["default"].green("已清除临时文件夹"));
+                        return [3, 4];
+                    case 4: return [2];
                 }
             });
         });
