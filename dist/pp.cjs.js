@@ -551,7 +551,6 @@ function onList(opt) {
             var tags_1 = value.tag.split(',');
             var filterTags = tagList.filter(function (v) { return tags_1.includes(v); });
             if (!filterTags.length) {
-                console.log("暂无此标签的模板");
                 return;
             }
         }

@@ -61,7 +61,7 @@ export function onList(opt?: { all?: boolean, tag:string, table?: boolean }) {
       let tags = value.tag.split(',')
       let filterTags = tagList.filter(v=>tags.includes(v))
       if (!filterTags.length) {
-        console.log("暂无此标签的模板");
+        // console.log("暂无此标签的模板");
         return
       }
     }
