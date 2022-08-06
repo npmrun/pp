@@ -1,6 +1,6 @@
 {
   "name": "@noderun/pp",
-  "version": "0.0.23",
+  "version": "0.0.25",
   "description": "命令行管理模板项目",
   "main": "dist/pp.umd.js",
   "module": "dist/pp.esm.js",
@@ -20,7 +20,7 @@
     "email": "1549469775@qq.com",
     "url": "https://xieyaxin.top"
   },
-  "repository": "http://git.xieyaxin.top/topuser/pp",
+  "repository": "https://github.com/npmrun/pp",
   "engines": {
     "node": ">=14.17.5"
   },

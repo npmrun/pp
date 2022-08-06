@@ -1,7 +1,5 @@
 # @noderun/pp
 
-> 有需求可话发送至邮箱`1549469775@qq.com`
-
 ### 安装
 ```bash
 npm i @noderun/pp -g
@@ -25,6 +23,7 @@ Commands:
   remove <name>                 删除一个模板仓库
   clone <name> <target>         克隆模板仓库
   copy [options] <templateDir>  简单文件夹克隆
+  ask <templateDir>             命令行交互测试
   help [command]                display help for command
 ```
 ### 同步
@@ -42,8 +41,10 @@ Commands:
 * [x] 同步功能
 * [x] 可展示表格`pp list --table`
 * [x] 增加`inquirer`自定义项目变量（beta）
+* [x] 命令行交互
+* [x] 本地模板命令行交互测试
 
 TODO
 
 * [ ] 代码整理
-* [ ] 修改前确认是否与远端同步
+* [ ] 远端同步可能造成的数据丢失
