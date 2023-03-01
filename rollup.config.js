@@ -45,6 +45,7 @@ function createPlugin() {
   const replacePlugin = replace({
     preventAssignment: true,
     __DEV__: !isProd,
+    __VERSION__: `"${pkg.version}"`
   });
   plugin = [sourcemaps(),nodeResolve(), commonjs(), tsPlugin, aliasPlugin, replacePlugin];
   return plugin;
