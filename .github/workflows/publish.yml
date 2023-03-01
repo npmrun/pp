@@ -3,8 +3,8 @@ name: Publish Package to npmjs
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    paths:
+      - 'src/**/*'
 
 jobs:
   publish:
