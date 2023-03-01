@@ -22,7 +22,7 @@ Commands:
   add [options] <url> <name>    添加一个模板仓库
   remove <name>                 删除一个模板仓库
   clone <name> <target>         克隆模板仓库
-  copy [options] <templateDir>  简单文件夹克隆
+  copy [options] <templateDir> <targetDir>  简单文件夹克隆
   ask <templateDir>             命令行交互测试
   help [command]                display help for command
 ```
