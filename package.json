@@ -1,6 +1,6 @@
 {
   "name": "@noderun/pp",
-  "version": "0.0.25",
+  "version": "0.1.0",
   "description": "命令行管理模板项目",
   "main": "dist/pp.umd.js",
   "module": "dist/pp.esm.js",
@@ -22,13 +22,14 @@
   },
   "repository": "https://github.com/npmrun/pp",
   "engines": {
-    "node": ">=14.17.5"
+    "node": ">=14.14.0"
   },
   "bin": {
     "pp": "./dist/pp.cjs.js"
   },
   "scripts": {
     "doc": "typedoc --out doc src/index.ts",
+    "check-min-node": "npx min-node",
     "build": "cross-env NODE_ENV=production node scripts/build.js",
     "dev": "cross-env NODE_ENV=development node scripts/dev.js"
   },

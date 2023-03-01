@@ -93,12 +93,12 @@ async function checkAsk(templateDir: string, vars: object) {
         const data = require(askPath)(inquirer);
         let answers = {}
         if(!data){
-            throw 'pp.ask.js的输出不符合格式'
+          throw 'pp.ask.js的输出不符合格式'
         }
         if(isPromise(data)){
-            answers = await data
+          answers = await data
         }else{
-            answers = await inquirer.prompt(data)
+          answers = await inquirer.prompt(data)
         }
         result = Object.assign(result, vars, answers)
     }
@@ -113,14 +113,14 @@ export async function onAsk(templateDir: string){
     console.log(vars);
 }
 
-export async function onCopy(templateDir: string, opts: { targetDir: string, p:string }){
+export async function onCopy(templateDir: string, targetDir: string, opts: { p:string }){
   if(!isExist(templateDir)){
     console.log(
       chalk.red("请提供模板目录")
     );
     return;
   }
-  if (isExist(opts.targetDir)) {
+  if (isExist(targetDir)) {
     console.log(
       chalk.red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹")
     );
@@ -143,7 +143,7 @@ export async function onCopy(templateDir: string, opts: { targetDir: string, p:s
     }
   }
   vars = await checkAsk(templateDir, vars)
-  writefile(templateDir, opts.targetDir, vars);
+  writefile(templateDir, targetDir, vars);
 }
 
 export function onClone(name: string, target: string, cc: { ignore?:boolean }) {

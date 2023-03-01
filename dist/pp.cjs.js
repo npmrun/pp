@@ -616,7 +616,7 @@ function onAsk(templateDir) {
         });
     });
 }
-function onCopy(templateDir, opts) {
+function onCopy(templateDir, targetDir, opts) {
     return tslib.__awaiter(this, void 0, void 0, function () {
         var vars;
         return tslib.__generator(this, function (_a) {
@@ -626,7 +626,7 @@ function onCopy(templateDir, opts) {
                         console.log(chalk__default["default"].red("请提供模板目录"));
                         return [2];
                     }
-                    if (isExist(opts.targetDir)) {
+                    if (isExist(targetDir)) {
                         console.log(chalk__default["default"].red("安全起见，不覆写已存在的目录，请先删除相同目录文件夹"));
                         return [2];
                     }
@@ -647,7 +647,7 @@ function onCopy(templateDir, opts) {
                     return [4, checkAsk(templateDir, vars)];
                 case 1:
                     vars = _a.sent();
-                    writefile(templateDir, opts.targetDir, vars);
+                    writefile(templateDir, targetDir, vars);
                     return [2];
             }
         });
@@ -786,8 +786,7 @@ program
     .description("删除一个模板仓库")
     .action(onRemove);
 program.command("clone <name> <target>").option("-i --ignore", "是否不需要模板变量").description("克隆模板仓库").action(onClone);
-program.command("copy <templateDir>")
-    .requiredOption("-d --targetDir <targetDir>", "目标路径")
+program.command("copy <templateDir> <targetDir>")
     .option("-p --p <p>", "模板变量")
     .description("简单文件夹克隆").action(onCopy);
 program.command("ask <templateDir>")
