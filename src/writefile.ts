@@ -61,8 +61,13 @@ export default function writefile (fromDir: string, toDir: string, opts = {}, fo
         fs.copyFileSync(fromRes, toRes)
       }else {
         if (Object.keys(opts).length) {
-          const html = ejs.render(originRoot, opts);
-          fs.writeFileSync(toRes, html);
+          try {
+            const html = ejs.render(originRoot, opts);
+            fs.writeFileSync(toRes, html);
+          } catch (error) {
+            // 赋值失败后原样复制
+            fs.writeFileSync(toRes, originRoot);
+          }
         }else {
           fs.writeFileSync(toRes, originRoot);
         }
