@@ -31,9 +31,10 @@ export function isExist (file: string) {
   return result
 }
 
+// https://stackoverflow.com/questions/25132934/get-mime-type-of-a-file-without-extension-in-node-js
 const exclude = ['.png','.jpg','.jpeg','.zip','.rar','.webp']
 
-export default function writefile (fromDir: string, toDir: string, opts = {}, force = false, isEjs = true) {
+export default function writefile (fromDir: string, toDir: string, opts: Record<string, any> = {}, force = false, isEjs = true) {
   if (!fromDir) {
     console.log(chalk.red("缺少模板目录"))
     return
@@ -50,6 +51,12 @@ export default function writefile (fromDir: string, toDir: string, opts = {}, fo
   const errors: any[] = []
   walkDir(fromDir, function (file) {
     let fromRes = path.resolve(fromDir, file)
+    // 文件名变量替换
+    for (const key in opts) {
+      if (Object.prototype.hasOwnProperty.call(opts, key)) {
+          file = file.replace(`$${key}$`, opts[key])
+      }
+    }
     let toRes = path.resolve(toDir, file)
     fs.ensureFileSync(toRes)
     const originRoot = fs.readFileSync(fromRes, {
@@ -66,10 +73,10 @@ export default function writefile (fromDir: string, toDir: string, opts = {}, fo
             fs.writeFileSync(toRes, html);
           } catch (error) {
             // 赋值失败后原样复制
-            fs.writeFileSync(toRes, originRoot);
+            fs.copyFileSync(fromRes, toRes)
           }
         }else {
-          fs.writeFileSync(toRes, originRoot);
+          fs.copyFileSync(fromRes, toRes)
         }
       }
     }catch (e) {

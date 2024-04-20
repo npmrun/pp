@@ -264,6 +264,11 @@ function writefile(fromDir, toDir, opts, force, isEjs) {
     var errors = [];
     walkDir(fromDir, function (file) {
         var fromRes = path__default["default"].resolve(fromDir, file);
+        for (var key in opts) {
+            if (Object.prototype.hasOwnProperty.call(opts, key)) {
+                file = file.replace("$".concat(key, "$"), opts[key]);
+            }
+        }
         var toRes = path__default["default"].resolve(toDir, file);
         fs__default["default"].ensureFileSync(toRes);
         var originRoot = fs__default["default"].readFileSync(fromRes, {
@@ -276,11 +281,16 @@ function writefile(fromDir, toDir, opts, force, isEjs) {
             }
             else {
                 if (Object.keys(opts).length) {
-                    var html = ejs__default["default"].render(originRoot, opts);
-                    fs__default["default"].writeFileSync(toRes, html);
+                    try {
+                        var html = ejs__default["default"].render(originRoot, opts);
+                        fs__default["default"].writeFileSync(toRes, html);
+                    }
+                    catch (error) {
+                        fs__default["default"].copyFileSync(fromRes, toRes);
+                    }
                 }
                 else {
-                    fs__default["default"].writeFileSync(toRes, originRoot);
+                    fs__default["default"].copyFileSync(fromRes, toRes);
                 }
             }
         }
@@ -563,11 +573,11 @@ function onList(opt) {
             msgs.push(key + (value.desc ? "(".concat(value.desc, ")") : "") + (value.tag ? "[".concat(value.tag, "]") : "") + (value.branch ? "{".concat(value.branch, "}") : ""));
         }
     });
-    if (opt === null || opt === void 0 ? void 0 : opt.table) {
-        console.log(table.toString());
+    if (opt === null || opt === void 0 ? void 0 : opt.simple) {
+        console.log(msgs.join('\n'));
     }
     else {
-        console.log(msgs.join('\n'));
+        console.log(table.toString());
     }
 }
 function checkAsk(templateDir, vars) {
@@ -755,14 +765,14 @@ function onCheck() {
 }
 
 var program = new commander.Command();
-program.version("0.1.1", "-v, --version").description("查看当前版本号");
+program.version("0.1.3", "-v, --version").description("查看当前版本号");
 program.helpOption("-h --help", "显示帮助信息");
 program.showHelpAfterError("( pp -h 查看帮助信息)");
 program.command("login <token>").description("本地保存Gitee的私人令牌").action(onLogin);
 program.command("whoami").description("查看私人令牌").action(Whoami);
 program.command("logout").description("删除私人令牌").action(onLogOut);
 program.command("sync").option('-f --force', "强制同步").option('-d --delete', "删除远端").option('-s --show', "查看远端").option('-p --pull', "强制拉取远端").description("同步模板列表").action(sync);
-program.command("list").alias('ls').option('-a --all').option('--table').option('-t --tag <tag>', "标签筛选").description("查看所有模板列表").action(onList);
+program.command("list").alias('ls').option('-a --all').option('-sp --simple').option('-t --tag <tag>', "标签筛选").description("查看所有模板列表").action(onList);
 program.command("check").description("查看配置文件").action(onCheck);
 program
     .command("add <url> <name>")
@@ -788,7 +798,7 @@ program
 program.command("clone <name> <target>").option("-i --ignore", "是否不需要模板变量").description("克隆模板仓库").action(onClone);
 program.command("copy <templateDir> <targetDir>")
     .option("-p --p <p>", "模板变量")
-    .description("简单文件夹克隆").action(onCopy);
+    .description("简单文件夹克隆 \n pp clone name project-name").action(onCopy);
 program.command("ask <templateDir>")
     .description("测试ask规则").action(onAsk);
 program.parse(process.argv);

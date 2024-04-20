@@ -42,7 +42,7 @@ export * from "./gitee"
  * 显示保存的列表
  * @param opt 参数: all:是否显示Git地址
  */
-export function onList(opt?: { all?: boolean, tag:string, table?: boolean }) {
+export function onList(opt?: { all?: boolean, tag:string, simple?: boolean }) {
   const data = Data.getInstance().getData()
   const keys = Object.keys(data)
   if (!data || !keys.length) {
@@ -79,34 +79,38 @@ export function onList(opt?: { all?: boolean, tag:string, table?: boolean }) {
       msgs.push(key + (value.desc ? `(${value.desc})` : "") + (value.tag ? `[${value.tag}]` : "") + (value.branch ? `{${value.branch}}` : ""));
     }
   });
-  if(opt?.table){
-    console.log(table.toString())
-  }else{
+  if(opt?.simple){
     console.log(msgs.join('\n'))
+  }else{
+    console.log(table.toString())
   }
 }
 
 async function checkAsk(templateDir: string, vars: object) {
     let result = {}
-    const askPath = path.resolve(templateDir, "./pp.ask.js")
-    if(fs.pathExistsSync(askPath)){
-        const data = require(askPath)(inquirer);
-        let answers = {}
-        if(!data){
-          throw 'pp.ask.js的输出不符合格式'
-        }
-        if(isPromise(data)){
-          answers = await data
-        }else{
-          answers = await inquirer.prompt(data)
-        }
-        result = Object.assign(result, vars, answers)
+    const allPath = [path.resolve(templateDir, "./pp.ask.js"), path.resolve(templateDir, "./pp.ask.cjs")]
+    for (let i = 0; i < allPath.length; i++) {
+      const askPath = allPath[i];
+      if(fs.pathExistsSync(askPath)){
+          const data = require(askPath)(inquirer);
+          let answers = {}
+          if(!data){
+            throw 'pp.ask.js的输出不符合格式'
+          }
+          if(isPromise(data)){
+            answers = await data
+          }else{
+            answers = await inquirer.prompt(data)
+          }
+          result = Object.assign(result, vars, answers)
+          break
+      }
     }
     return result
 }
 
 export async function onAsk(templateDir: string){
-    const vars = await checkAsk(templateDir, {})
+    const vars = await checkAsk(templateDir ?? ".", {})
     console.log(
         chalk.red("Ask变量如下：")
     );
