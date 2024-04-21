@@ -150,7 +150,7 @@ export async function onCopy(templateDir: string, targetDir: string, opts: { p:s
   writefile(templateDir, targetDir, vars);
 }
 
-export function onClone(name: string, target: string, cc: { ignore?:boolean }) {
+export function onClone(name: string, target: string, cc: { ignore?:boolean, http?:boolean }) {
   const item = Data.getInstance().findOne(name)
   if (!item) {
     console.log(`请先添加该项目`);
@@ -182,7 +182,7 @@ export function onClone(name: string, target: string, cc: { ignore?:boolean }) {
     }
   }
   const branch = item.branch;
-  download(branch?git_url+'#'+branch:git_url, tempPath, { clone: true }, async function (err: Error) {
+  download(branch?git_url+'#'+branch:git_url, tempPath, cc.http ? { clone: false } : { clone: true }, async function (err: Error) {
     if (err) throw err;
     console.log("临时文件夹为:" + tempPath);
     try {

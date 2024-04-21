@@ -59,9 +59,6 @@ export default function writefile (fromDir: string, toDir: string, opts: Record<
     }
     let toRes = path.resolve(toDir, file)
     fs.ensureFileSync(toRes)
-    const originRoot = fs.readFileSync(fromRes, {
-      encoding: "utf8",
-    });
     try{
       let ext = path.parse(fromRes).ext
       if(exclude.includes(ext) || !isEjs){
@@ -69,6 +66,9 @@ export default function writefile (fromDir: string, toDir: string, opts: Record<
       }else {
         if (Object.keys(opts).length) {
           try {
+            const originRoot = fs.readFileSync(fromRes, {
+              encoding: "utf8",
+            });
             const html = ejs.render(originRoot, opts);
             fs.writeFileSync(toRes, html);
           } catch (error) {
