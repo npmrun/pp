@@ -5,7 +5,7 @@ import fetch, { Request } from "node-fetch";
 import qs from "qs";
 import ora from "ora";
 import config from "@/config";
-import {dateTimeFormat, readFileCreateTime, readFileModifyTime, syncWriteFile, writeIniFile} from "@/util";
+import {dateTimeFormat, readFileCreateTime, readFileModifyTime, syncWriteFile} from "@/util";
 
 export async function onLogin(token: string) {
   const res = await (
